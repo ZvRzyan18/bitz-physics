@@ -50,7 +50,8 @@ void oxb_dynamic2d_init(oxb_dynamic2d *oxb_restrict const body, const oxb_object
  body->_restitution = info->_type._dynamic_body._restitution;
 
  body->_flags = info->_flags & (OXB_SHAPE_MASK_2D | OXB_FLAG_MASK_2D);
- 
+
+ body->_island_id = OXB_POOL_NULL_ID;
  /* calculate mass, inertia and copy shape data */
  uint8_t shape_type = body->_flags & OXB_SHAPE_MASK_2D;
  switch(shape_type) {
@@ -91,7 +92,11 @@ void oxb_dynamic2d_init(oxb_dynamic2d *oxb_restrict const body, const oxb_object
 
 
 void oxb_dynamic2d_integrate(oxb_dynamic2d *oxb_restrict const body, oxb_vec2 gravity, const float dt) {
+
  body->_color_bits = 0;
+ if(body->_flags & OXB_FLAG_SLEEP_2D)
+  return;
+ 
  oxb_vec2 dt_vec = oxb_vec2_splat(dt);
  oxb_vec2 position = oxb_vec2_load(body->_position._arr);
  oxb_complex rotation = oxb_vec2_load(body->_rotation._arr);
@@ -108,6 +113,31 @@ void oxb_dynamic2d_integrate(oxb_dynamic2d *oxb_restrict const body, oxb_vec2 gr
  
  velocity = oxb_vec2_mul(velocity, linear_damping);
  omega *= angular_damping;
+
+
+ /* resting state */
+  const float vt = 1.2f;
+  const float vo = 0.4f;
+
+ if(!(body->_flags & OXB_FLAG_REST_2D)) {
+  if(oxb_vec2_dot(velocity, velocity) < vt && oxb_abs(omega) < vo) {
+   body->_resting_time += dt;
+   if(body->_resting_time > 1.5f) {
+    body->_flags |= OXB_FLAG_REST_2D;
+    velocity = oxb_vec2_mul(velocity, oxb_vec2_splat(0.3f));
+    omega *= 0.3f;
+    body->_resting_time = 0.0f;
+   }
+  } else {
+   body->_resting_time = 0.0f;
+  }
+ } else {
+  if(oxb_vec2_dot(velocity, velocity) > vt || oxb_abs(omega) > vo) {
+   body->_resting_time = 0.0f;
+   body->_flags &= ~OXB_FLAG_REST_2D;
+  }
+ }
+ 
 
 
  float delta_omega = omega * dt;
@@ -161,13 +191,16 @@ void oxb_kinematic2d_init(oxb_kinematic2d *oxb_restrict const body, const oxb_ob
  body->_damping._arr[0] = oxb_log2(info->_type._kinematic_body._linear_damping);
  body->_damping._arr[1] = oxb_log2(info->_type._kinematic_body._angular_damping);
 
+ oxb_vec2_store(body->_up_direction._arr, info->_type._kinematic_body._up_direction);
+
  body->_friction._arr[0] = info->_type._kinematic_body._static_friction;
  body->_friction._arr[1] = info->_type._kinematic_body._dynamic_friction; 
  body->_restitution = info->_type._kinematic_body._restitution;
 
  
  body->_flags = info->_flags & (OXB_SHAPE_MASK_2D | OXB_FLAG_MASK_2D);
- 
+ body->_priority = info->_type._kinematic_body._priority;
+
  /* calculate mass, inertia and copy shape data */
  uint8_t shape_type = body->_flags & OXB_SHAPE_MASK_2D;
  switch(shape_type) {

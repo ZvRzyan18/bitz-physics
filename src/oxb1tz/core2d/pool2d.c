@@ -37,7 +37,7 @@ oxb_handle oxb_pool2d_acquire(oxb_pool2d *oxb_restrict const pool, const oxb_obj
   	oxb_dynamic2d *dynamic_body = (oxb_dynamic2d*)oxb_container_get(&pool->_containers[OXB_POOL2D_TYPE_DYNAMIC_2D], container_id);
   	oxb_dynamic2d_init(dynamic_body, info);
   	dynamic_body->_allocation = handle;
-  	
+
   	dynamic_body->_bvh_id = oxb_bvh2d_insert(bvh, dynamic_body->_aabb, handle);
   }
   break;
@@ -111,6 +111,8 @@ void oxb_pool2d_getdata(oxb_pool2d *oxb_restrict const pool, oxb_object2d_data *
   	dat->_rotation = oxb_vec2_load(body->_rotation._arr);
   	dat->_velocity = oxb_vec2_load(body->_velocity._arr);
   	dat->_omega = body->_omega;
+  	dat->_resting = (body->_flags & OXB_FLAG_REST_2D) != 0;
+  	dat->_sleeping = (body->_flags & OXB_FLAG_SLEEP_2D) != 0;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -123,6 +125,9 @@ void oxb_pool2d_getdata(oxb_pool2d *oxb_restrict const pool, oxb_object2d_data *
   	dat->_rotation = oxb_vec2_load(body->_rotation._arr);
   	dat->_velocity = oxb_vec2_load(body->_velocity._arr);
   	dat->_omega = body->_omega;
+
+  	dat->_resting = false;
+  	dat->_sleeping = false;
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:

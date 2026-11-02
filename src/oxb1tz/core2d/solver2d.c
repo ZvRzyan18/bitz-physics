@@ -5,12 +5,12 @@
 
 /*
  Projected Gauss Seidel algorithm solver
- 
- TODO : handle kinematic vs kinematic body
+ with soft constraints
 */
 void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
  uint32_t used_color = 0;
- void *body_a, *body_b;
+ bool both_kinematics = false;
+ void *a_obj, *b_obj;
  
  oxb_vec2 a_velocity;
  float a_inv_mass;
@@ -27,8 +27,8 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
  switch(m->_a._type) {
   case OXB_POOL2D_TYPE_DYNAMIC_2D:
   {
-  	body_a = oxb_pool2d_get(pool, m->_a);
-  	oxb_dynamic2d *obj = (oxb_dynamic2d*)body_a;
+  	a_obj = oxb_pool2d_get(pool, m->_a);
+  	oxb_dynamic2d *obj = (oxb_dynamic2d*)a_obj;
   	a_velocity = oxb_vec2_load(obj->_velocity._arr);
   	a_inv_mass = obj->_inv_mass;
   	a_inv_inertia = obj->_inv_rotational_inertia;
@@ -39,32 +39,35 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
   {
-  	body_a = oxb_pool2d_get(pool, m->_a);
-  	oxb_kinematic2d *obj = (oxb_kinematic2d*)body_a;
-  	a_velocity = oxb_vec2_load(obj->_velocity._arr);
-  	switch(m->_b._type) {
-  	 case OXB_POOL2D_TYPE_DYNAMIC_2D:
-  	 	a_inv_mass = 0.0f;
-  	  a_inv_inertia = 0.0f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_KINEMATIC_2D:
-  	 	a_inv_mass = 0.5f;
-  	  a_inv_inertia = 0.5f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_STATIC_2D:
-  	 	a_inv_mass = 1.0f;
-  	  a_inv_inertia = 1.0f;
-  	 break;
-  	}
-  	a_restitution = obj->_restitution;
-  	a_omega = obj->_omega;
+  	a_obj = oxb_pool2d_get(pool, m->_a);
+  	oxb_kinematic2d *obj = (oxb_kinematic2d*)a_obj;
+   switch(m->_b._type) {
+   	case OXB_POOL2D_TYPE_DYNAMIC_2D:
+    	a_velocity = oxb_vec2_splat(0.0f);
+  	  a_inv_mass = 0.0f;
+  	  a_restitution = obj->_restitution;
+   	break;
+   	case OXB_POOL2D_TYPE_KINEMATIC_2D:
+   	 both_kinematics = true;
+    	a_velocity = oxb_vec2_splat(0.0f);
+  	  a_inv_mass = 0.0f;
+  	  a_restitution = 0.0f;
+   	break;
+   	case OXB_POOL2D_TYPE_STATIC_2D:
+    	a_velocity = oxb_vec2_load(obj->_velocity._arr);
+  	  a_inv_mass = 1.0f;
+  	  a_restitution = 0.0f;
+   	break;
+   }
+   a_inv_inertia = 0.0f;
+  	a_omega = 0.0f;
   	used_color |= obj->_color_bits;
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
   {
-  	body_a = oxb_pool2d_get(pool, m->_a);
-  	oxb_static2d *obj = (oxb_static2d*)body_a;
+  	a_obj = oxb_pool2d_get(pool, m->_a);
+  	oxb_static2d *obj = (oxb_static2d*)a_obj;
   	a_velocity = oxb_vec2_splat(0.0f);
   	a_inv_mass = 0.0f;
   	a_inv_inertia = 0.0f;
@@ -80,8 +83,8 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
  switch(m->_b._type) {
   case OXB_POOL2D_TYPE_DYNAMIC_2D:
   {
-  	body_b = oxb_pool2d_get(pool, m->_b);
-  	oxb_dynamic2d *obj = (oxb_dynamic2d*)body_b;
+  	b_obj = oxb_pool2d_get(pool, m->_b);
+  	oxb_dynamic2d *obj = (oxb_dynamic2d*)b_obj;
   	b_velocity = oxb_vec2_load(obj->_velocity._arr);
   	b_inv_mass = obj->_inv_mass;
   	b_inv_inertia = obj->_inv_rotational_inertia;
@@ -92,32 +95,35 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
   {
-  	body_b = oxb_pool2d_get(pool, m->_b);
-  	oxb_kinematic2d *obj = (oxb_kinematic2d*)body_b;
-  	b_velocity = oxb_vec2_load(obj->_velocity._arr);
-  	switch(m->_a._type) {
-  	 case OXB_POOL2D_TYPE_DYNAMIC_2D:
-  	 	b_inv_mass = 0.0f;
-  	  b_inv_inertia = 0.0f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_KINEMATIC_2D:
-  	 	b_inv_mass = 0.5f;
-  	  b_inv_inertia = 0.5f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_STATIC_2D:
-  	 	b_inv_mass = 1.0f;
-  	  b_inv_inertia = 1.0f;
-  	 break;
-  	}
-  	b_restitution = obj->_restitution;
-  	b_omega = obj->_omega;
+  	b_obj = oxb_pool2d_get(pool, m->_b);
+  	oxb_kinematic2d *obj = (oxb_kinematic2d*)b_obj;
+   switch(m->_a._type) {
+   	case OXB_POOL2D_TYPE_DYNAMIC_2D:
+    	b_velocity = oxb_vec2_splat(0.0f);
+  	  b_inv_mass = 0.0f;
+  	  b_restitution = obj->_restitution;
+   	break;
+   	case OXB_POOL2D_TYPE_KINEMATIC_2D:
+   	 both_kinematics = true;
+    	b_velocity = oxb_vec2_splat(0.0f);
+  	  b_inv_mass = 0.0f;
+  	  b_restitution = 0.0f;
+   	break;
+   	case OXB_POOL2D_TYPE_STATIC_2D:
+    	b_velocity = oxb_vec2_load(obj->_velocity._arr);
+  	  b_inv_mass = 1.0f;
+  	  b_restitution = 0.0f;
+   	break;
+   }
+   b_inv_inertia = 0.0f;
+  	b_omega = 0.0f;
   	used_color |= obj->_color_bits;
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
   {
-  	body_b = oxb_pool2d_get(pool, m->_b);
-  	oxb_static2d *obj = (oxb_static2d*)body_b;
+  	b_obj = oxb_pool2d_get(pool, m->_b);
+  	oxb_static2d *obj = (oxb_static2d*)b_obj;
   	b_velocity = oxb_vec2_splat(0.0f);
   	b_inv_mass = 0.0f;
   	b_inv_inertia = 0.0f;
@@ -130,6 +136,26 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
    oxb_unreachable();
  }
 
+ if(both_kinematics) {
+ 	oxb_kinematic2d *obj_a = (oxb_kinematic2d*)a_obj;
+ 	oxb_kinematic2d *obj_b = (oxb_kinematic2d*)b_obj;
+  if(obj_a->_priority < obj_b->_priority) {
+  	a_velocity = oxb_vec2_load(obj_a->_velocity._arr);
+  	a_inv_mass = 1.0f;
+  	a_omega = 1.0f;
+  } else if(obj_a->_priority > obj_b->_priority) {
+  	b_velocity = oxb_vec2_load(obj_b->_velocity._arr);
+  	b_inv_mass = 1.0f;
+  	b_omega = 1.0f;
+  } else {
+  	a_velocity = oxb_vec2_load(obj_a->_velocity._arr);
+  	b_velocity = oxb_vec2_load(obj_b->_velocity._arr);
+  	a_inv_mass = 0.5f;
+  	b_inv_mass = 0.5f;
+  	a_omega = 0.5f;
+  	b_omega = 0.5f;
+  }
+ }
 
  float inv_mass = a_inv_mass + b_inv_mass;
  float e = oxb_min(a_restitution, b_restitution);
@@ -228,35 +254,39 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
  switch(m->_a._type) {
   case OXB_POOL2D_TYPE_DYNAMIC_2D:
   {
-  	oxb_dynamic2d *obj = (oxb_dynamic2d*)body_a;
+  	oxb_dynamic2d *obj = (oxb_dynamic2d*)a_obj;
   	obj->_color_bits |= color_bit;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
   {
-  	oxb_kinematic2d *obj = (oxb_kinematic2d*)body_a;
+  	oxb_kinematic2d *obj = (oxb_kinematic2d*)a_obj;
   	obj->_color_bits |= color_bit;
   }
+  break;
  }
 
  switch(m->_b._type) {
   case OXB_POOL2D_TYPE_DYNAMIC_2D:
   {
-  	oxb_dynamic2d *obj = (oxb_dynamic2d*)body_b;
+  	oxb_dynamic2d *obj = (oxb_dynamic2d*)b_obj;
   	obj->_color_bits |= color_bit;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
   {
-  	oxb_kinematic2d *obj = (oxb_kinematic2d*)body_b;
+  	oxb_kinematic2d *obj = (oxb_kinematic2d*)b_obj;
   	obj->_color_bits |= color_bit;
   }
+  break;
  }
 
 }
 
 
 void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
+ bool both_kinematics = false;
+ 
  void *a_obj;
  oxb_vec2 a_velocity;
  float a_inv_mass;
@@ -270,7 +300,7 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
  float b_omega;
  
  (void)input;
- 
+
  switch(m->_a._type) {
   case OXB_POOL2D_TYPE_DYNAMIC_2D:
   {
@@ -286,22 +316,23 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
   {
   	a_obj = oxb_pool2d_get(pool, m->_a);
   	oxb_kinematic2d *obj = (oxb_kinematic2d*)a_obj;
-  	a_velocity = oxb_vec2_load(obj->_velocity._arr);
-  	switch(m->_b._type) {
-  	 case OXB_POOL2D_TYPE_DYNAMIC_2D:
-  	 	a_inv_mass = 0.0f;
-  	  a_inv_inertia = 0.0f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_KINEMATIC_2D:
-  	 	a_inv_mass = 0.5f;
-  	  a_inv_inertia = 0.5f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_STATIC_2D:
-  	 	a_inv_mass = 1.0f;
-  	  a_inv_inertia = 1.0f;
-  	 break;
-  	}
-  	a_omega = obj->_omega;
+   switch(m->_b._type) {
+   	case OXB_POOL2D_TYPE_DYNAMIC_2D:
+    	a_velocity = oxb_vec2_splat(0.0f);
+  	  a_inv_mass = 0.0f;
+   	break;
+   	case OXB_POOL2D_TYPE_KINEMATIC_2D:
+   	 both_kinematics = true;
+    	a_velocity = oxb_vec2_splat(0.0f);
+  	  a_inv_mass = 0.0f;
+   	break;
+   	case OXB_POOL2D_TYPE_STATIC_2D:
+    	a_velocity = oxb_vec2_load(obj->_velocity._arr);
+  	  a_inv_mass = 1.0f;
+   	break;
+   }
+   a_inv_inertia = 0.0f;
+  	a_omega = 0.0f;
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
@@ -331,24 +362,25 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
   {
-  	b_obj = oxb_pool2d_get(pool, m->_b);
+  	b_obj = oxb_pool2d_get(pool, m->_a);
   	oxb_kinematic2d *obj = (oxb_kinematic2d*)b_obj;
-  	b_velocity = oxb_vec2_load(obj->_velocity._arr);
-  	switch(m->_a._type) {
-  	 case OXB_POOL2D_TYPE_DYNAMIC_2D:
-  	 	b_inv_mass = 0.0f;
-  	  b_inv_inertia = 0.0f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_KINEMATIC_2D:
-  	 	b_inv_mass = 0.5f;
-  	  b_inv_inertia = 0.5f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_STATIC_2D:
-  	 	b_inv_mass = 1.0f;
-  	  b_inv_inertia = 1.0f;
-  	 break;
-  	}
-  	b_omega = obj->_omega;
+   switch(m->_a._type) {
+   	case OXB_POOL2D_TYPE_DYNAMIC_2D:
+    	b_velocity = oxb_vec2_splat(0.0f);
+  	  b_inv_mass = 0.0f;
+   	break;
+   	case OXB_POOL2D_TYPE_KINEMATIC_2D:
+   	 both_kinematics = true;
+     b_velocity = oxb_vec2_splat(0.0f);
+  	  b_inv_mass = 0.0f;
+   	break;
+   	case OXB_POOL2D_TYPE_STATIC_2D:
+    	b_velocity = oxb_vec2_load(obj->_velocity._arr);
+  	  b_inv_mass = 1.0f;
+   	break;
+   }
+   b_inv_inertia = 0.0f;
+  	b_omega = 0.0f;
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
@@ -365,6 +397,35 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
    oxb_unreachable();
  }
 
+ bool both_dynamic = m->_a._type == m->_b._type && m->_a._type == OXB_POOL2D_TYPE_DYNAMIC_2D;
+ if(both_dynamic) {
+  oxb_dynamic2d *dynamic_a = (oxb_dynamic2d*)a_obj;
+  oxb_dynamic2d *dynamic_b = (oxb_dynamic2d*)b_obj;
+  if(dynamic_a->_flags & OXB_FLAG_SLEEP_2D && dynamic_b->_flags & OXB_FLAG_SLEEP_2D)
+   return;
+ }
+ 
+ if(both_kinematics) {
+ 	oxb_kinematic2d *obj_a = (oxb_kinematic2d*)a_obj;
+ 	oxb_kinematic2d *obj_b = (oxb_kinematic2d*)b_obj;
+  if(obj_a->_priority < obj_b->_priority) {
+  	a_velocity = oxb_vec2_load(obj_a->_velocity._arr);
+  	a_inv_mass = 1.0f;
+  	a_omega = 1.0f;
+  } else if(obj_a->_priority > obj_b->_priority) {
+  	b_velocity = oxb_vec2_load(obj_b->_velocity._arr);
+  	b_inv_mass = 1.0f;
+  	b_omega = 1.0f;
+  } else {
+  	a_velocity = oxb_vec2_load(obj_a->_velocity._arr);
+  	b_velocity = oxb_vec2_load(obj_b->_velocity._arr);
+  	a_inv_mass = 0.5f;
+  	b_inv_mass = 0.5f;
+  	a_omega = 0.5f;
+  	b_omega = 0.5f;
+  }
+ }
+ 
  for(uint8_t i = 0; i < m->_contact_count; i++) {
  	oxb_contact2d *const contact = m->_contacts + i;
 
@@ -396,8 +457,7 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
   {
   	oxb_kinematic2d *obj = (oxb_kinematic2d*)a_obj;
   	oxb_vec2_store(obj->_velocity._arr, a_velocity);
-   obj->_omega = a_omega;
- 	}
+  }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
   break;
@@ -418,7 +478,6 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
   {
   	oxb_kinematic2d *obj = (oxb_kinematic2d*)b_obj;
   	oxb_vec2_store(obj->_velocity._arr, b_velocity);
-   obj->_omega = b_omega;
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
@@ -431,6 +490,7 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
 
 
 void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
+ bool both_kinematics = false;
  void *a_obj;
  oxb_vec2 a_velocity;
  float a_inv_mass;
@@ -464,24 +524,29 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
   {
   	a_obj = oxb_pool2d_get(pool, m->_a);
   	oxb_kinematic2d *obj = (oxb_kinematic2d*)a_obj;
-  	a_velocity = oxb_vec2_load(obj->_velocity._arr);
-  	switch(m->_b._type) {
-  	 case OXB_POOL2D_TYPE_DYNAMIC_2D:
-  	 	a_inv_mass = 0.0f;
-  	  a_inv_inertia = 0.0f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_KINEMATIC_2D:
-  	 	a_inv_mass = 0.5f;
-  	  a_inv_inertia = 0.5f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_STATIC_2D:
-  	 	a_inv_mass = 1.0f;
-  	  a_inv_inertia = 1.0f;
-  	 break;
-  	}
-  	a_omega = obj->_omega;
-   a_static_friction = obj->_friction._arr[0];
-   a_dynamic_friction = obj->_friction._arr[1];
+   switch(m->_b._type) {
+   	case OXB_POOL2D_TYPE_DYNAMIC_2D:
+    	a_velocity = oxb_vec2_splat(0.0f);
+  	  a_inv_mass = 0.0f;
+     a_static_friction = obj->_friction._arr[0];
+     a_dynamic_friction = obj->_friction._arr[1];
+   	break;
+   	case OXB_POOL2D_TYPE_KINEMATIC_2D:
+   	 both_kinematics = true;
+    	a_velocity = oxb_vec2_splat(0.0f);
+  	  a_inv_mass = 0.0f;
+     a_static_friction = 0.0f;
+     a_dynamic_friction = 0.0f;
+   	break;
+   	case OXB_POOL2D_TYPE_STATIC_2D:
+    	a_velocity = oxb_vec2_load(obj->_velocity._arr);
+  	  a_inv_mass = 1.0f;
+     a_static_friction = 0.0f;
+     a_dynamic_friction = 0.0f;
+   	break;
+   }
+   a_inv_inertia = 0.0f;
+  	a_omega = 0.0f;
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
@@ -516,26 +581,31 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
   {
-  	b_obj = oxb_pool2d_get(pool, m->_b);
+  	b_obj = oxb_pool2d_get(pool, m->_a);
   	oxb_kinematic2d *obj = (oxb_kinematic2d*)b_obj;
-  	b_velocity = oxb_vec2_load(obj->_velocity._arr);
-  	switch(m->_a._type) {
-  	 case OXB_POOL2D_TYPE_DYNAMIC_2D:
-  	 	b_inv_mass = 0.0f;
-  	  b_inv_inertia = 0.0f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_KINEMATIC_2D:
-  	 	b_inv_mass = 0.5f;
-  	  b_inv_inertia = 0.5f;
-  	 break;
-  	 case OXB_POOL2D_TYPE_STATIC_2D:
-  	 	b_inv_mass = 1.0f;
-  	  b_inv_inertia = 1.0f;
-  	 break;
-  	}
-  	b_omega = obj->_omega;
-   b_static_friction = obj->_friction._arr[0];
-   b_dynamic_friction = obj->_friction._arr[1];
+   switch(m->_a._type) {
+   	case OXB_POOL2D_TYPE_DYNAMIC_2D:
+    	b_velocity = oxb_vec2_splat(0.0f);
+  	  b_inv_mass = 0.0f;
+     b_static_friction = obj->_friction._arr[0];
+     b_dynamic_friction = obj->_friction._arr[1];
+   	break;
+   	case OXB_POOL2D_TYPE_KINEMATIC_2D:
+   	 both_kinematics = true;
+    	b_velocity = oxb_vec2_splat(0.0f);
+  	  b_inv_mass = 0.0f;
+     b_static_friction = 0.0f;
+     b_dynamic_friction = 0.0f;
+   	break;
+   	case OXB_POOL2D_TYPE_STATIC_2D:
+    	b_velocity = oxb_vec2_load(obj->_velocity._arr);
+  	  b_inv_mass = 1.0f;
+     b_static_friction = 0.0f;
+     b_dynamic_friction = 0.0f;
+   	break;
+   }
+   b_inv_inertia = 0.0f;
+  	b_omega = 0.0f;
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
@@ -554,7 +624,36 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
    assert(0);
    oxb_unreachable();
  }
-
+ 
+ bool both_dynamic = m->_a._type == m->_b._type && m->_a._type == OXB_POOL2D_TYPE_DYNAMIC_2D;
+ if(both_dynamic) {
+  oxb_dynamic2d *dynamic_a = (oxb_dynamic2d*)a_obj;
+  oxb_dynamic2d *dynamic_b = (oxb_dynamic2d*)b_obj;
+  if(dynamic_a->_flags & OXB_FLAG_SLEEP_2D && dynamic_b->_flags & OXB_FLAG_SLEEP_2D)
+   return;
+ }
+ 
+ if(both_kinematics) {
+ 	oxb_kinematic2d *obj_a = (oxb_kinematic2d*)a_obj;
+ 	oxb_kinematic2d *obj_b = (oxb_kinematic2d*)b_obj;
+  if(obj_a->_priority < obj_b->_priority) {
+  	a_velocity = oxb_vec2_load(obj_a->_velocity._arr);
+  	a_inv_mass = 1.0f;
+  	a_omega = 1.0f;
+  } else if(obj_a->_priority > obj_b->_priority) {
+  	b_velocity = oxb_vec2_load(obj_b->_velocity._arr);
+  	b_inv_mass = 1.0f;
+  	b_omega = 1.0f;
+  } else {
+  	a_velocity = oxb_vec2_load(obj_a->_velocity._arr);
+  	b_velocity = oxb_vec2_load(obj_b->_velocity._arr);
+  	a_inv_mass = 0.5f;
+  	b_inv_mass = 0.5f;
+  	a_omega = 0.5f;
+  	b_omega = 0.5f;
+  }
+ }
+ 
  float dynamic_friction = oxb_sqrt(a_dynamic_friction * b_dynamic_friction); 
  float static_friction = oxb_sqrt(a_static_friction * b_static_friction);
 
@@ -575,7 +674,7 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
 		float vn = oxb_vec2_dot(relative_vel, normal);
 
 
-  float slop = 0.004f;
+  float slop = 0.08f;
   float penetration_error = 0.0f;
   
   if(depth < 0.0f) {
@@ -670,8 +769,7 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
   {
   	oxb_kinematic2d *obj = (oxb_kinematic2d*)a_obj;
   	oxb_vec2_store(obj->_velocity._arr, a_velocity);
-   obj->_omega = a_omega;
- 	}
+  }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
   break;
@@ -692,7 +790,6 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
   {
   	oxb_kinematic2d *obj = (oxb_kinematic2d*)b_obj;
   	oxb_vec2_store(obj->_velocity._arr, b_velocity);
-   obj->_omega = b_omega;
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:

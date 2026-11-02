@@ -6,6 +6,7 @@
 #include "oxb1tz/core2d/contacthash2d.h"
 #include "oxb1tz/core2d/bvh2d.h"
 #include "oxb1tz/core2d/solver2d.h"
+#include "oxb1tz/core2d/island2d.h"
 
 struct oxb_world2d {
  oxb_allocator      _allocator;
@@ -13,12 +14,15 @@ struct oxb_world2d {
  oxb_contacthash2d  _contacts;
  oxb_bvh2d          _bvh2d;
  oxb_solver2d_input _input;
+ oxb_island2d       _island;
+ 
  oxb_vec2           _gravity;
  
  uint32_t           _colors[32];
  uint32_t           _solo_manifolds;
  float              _dt;
  uint8_t            _substeps;
+ uint8_t            _island_frame;
 };
 
 oxb_world2d* oxb_world2d_create(const oxb_world2d_info *oxb_restrict const info);

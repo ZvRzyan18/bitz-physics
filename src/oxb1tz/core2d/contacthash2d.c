@@ -17,7 +17,6 @@ oxb_const oxb_inline uint32_t hash(uint32_t a) {
  return a;
 }
 
-
 /*
  symetrical hash function
  
