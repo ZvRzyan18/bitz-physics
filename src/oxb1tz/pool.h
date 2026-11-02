@@ -37,11 +37,12 @@ void oxb_pool_release(oxb_pool *oxb_restrict const pool, const oxb_pool_id id);
 void oxb_pool_reset(oxb_pool *oxb_restrict const pool);
 
 oxb_inline void* oxb_pool_get(oxb_pool *oxb_restrict const pool, const oxb_pool_id id) {
+ /* catch null id */
+ assert(!oxb_pool_id_isnull(id));
+ 
  /* catch overflow id */
  assert(id._val < pool->_max_size);
 
- /* catch null id */
- assert(!oxb_pool_id_isnull(id));
  return (void*)(pool->_bytes + (pool->_stride * id._val));
 }
 
