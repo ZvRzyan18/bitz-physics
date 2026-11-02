@@ -30,7 +30,7 @@ typedef enum {
  OXB_FLAG_LOCK_POSY_2D =   0b00000000000000000000000010000000,
  OXB_FLAG_LOCK_ROT_2D =    0b00000000000000000000000100000000,
  OXB_FLAG_SLEEP_2D =       0b00000000000000000000001000000000,
- OXB_FLAG_STILL_2D =       0b00000000000000000000010000000000,
+ OXB_FLAG_REST_2D =        0b00000000000000000000010000000000, 
  OXB_FLAG_MASK_2D =        0b00000000000000000000011111000000,
 } oxb_flag_type2d;
 
@@ -78,6 +78,7 @@ typedef struct {
    oxb_vec2    _position;
    oxb_complex _rotation;
    oxb_vec2    _velocity;
+   oxb_vec2    _up_direction;
    float       _omega;
    
    float       _linear_damping;
@@ -85,6 +86,7 @@ typedef struct {
    float       _restitution;
    float       _static_friction;
    float       _dynamic_friction;
+   uint8_t     _priority;
   } _kinematic_body;
 
   struct {
@@ -106,6 +108,8 @@ typedef struct {
  oxb_complex _rotation;
  oxb_vec2    _velocity;
  float       _omega;
+ bool        _sleeping;
+ bool        _resting;
 } oxb_object2d_data;
 
 

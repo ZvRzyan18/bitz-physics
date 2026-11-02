@@ -77,7 +77,7 @@ typedef struct {
  uint8_t _type;
 } oxb_handle;
 
-static oxb_handle OXB_HANDLE_NULL = {OXB_ID_MAX, 0xFF};
+static const oxb_handle OXB_HANDLE_NULL = {OXB_ID_MAX, 0xFF};
 oxb_inline bool oxb_handle_isequal(oxb_handle a, oxb_handle b) {
  return a._type == b._type && a._id == b._id;
 }

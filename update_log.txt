@@ -1,5 +1,9 @@
 # version 0.1.1
 
+• fully implemented island2d
+
+• handle kinematic vs kinematic and kinematic vs static
+
 • add matrix load operation
 
 • add matrix 2x2

@@ -47,6 +47,7 @@ typedef struct {
  float             _inv_mass;
  float             _inv_rotational_inertia;
  float             _restitution;
+ float             _resting_time;
  uint16_t          _flags;
 } oxb_dynamic2d;
 
@@ -59,12 +60,14 @@ typedef struct {
  oxb_packedv2f     _velocity;
  oxb_packedv2f     _damping;
  oxb_packedv2f     _friction;
+ oxb_packedv2f     _up_direction;
  oxb_handle        _allocation;
  oxb_pool_id       _bvh_id;
- uint32_t          _color_bits;
  float             _omega;
  float             _restitution;
+ uint32_t          _color_bits;
  uint16_t          _flags;
+ uint8_t           _priority;
 } oxb_kinematic2d;
 
 
