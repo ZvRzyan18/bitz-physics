@@ -87,7 +87,6 @@ oxb_noinline static void broadphase_query(oxb_handle ha, oxb_handle hb, void *w)
 
 
 
-
 oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const world, const float dt) {
  world->_dt = dt;
  float divided_dt = dt / (float)world->_substeps;
@@ -97,8 +96,20 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   oxb_bvh2d_mediansplit(&world->_bvh2d, &world->_pool2d);
 
  oxb_bvh2d_traversepairs(&world->_bvh2d, broadphase_query, world);
-
-
+/*
+ for(size_t i = 0; i < world->_pool2d._containers[0]._size; ++i) {
+  oxb_dynamic2d *body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
+  oxb_bvh2d_traversebody(&world->_bvh2d, broadphase_query, world, body->_bvh_id);
+ }
+ for(size_t i = 0; i < world->_pool2d._containers[1]._size; ++i) {
+  oxb_kinematic2d *body = ((oxb_kinematic2d*)world->_pool2d._containers[1]._bytes) + i;
+  oxb_bvh2d_traversebody(&world->_bvh2d, broadphase_query, world, body->_bvh_id);
+ }
+ for(size_t i = 0; i < world->_pool2d._containers[2]._size; ++i) {
+  oxb_static2d *body = ((oxb_static2d*)world->_pool2d._containers[2]._bytes) + i;
+  oxb_bvh2d_traversebody(&world->_bvh2d, broadphase_query, world, body->_bvh_id);
+ }
+*/
  float damping_ratio = 2.6f;
  float hertz = 9.33f;
  float soft_dt = dt;
@@ -110,6 +121,7 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
 	world->_input._bias_coeff = omega / a1;
 	world->_input._mass_coeff = a2 * a3;
 	world->_input._impulse_coeff = a3;
+	world->_input._dt = soft_dt;
 	world->_input._inv_dt = 1.0f / soft_dt;
 	world->_input._ctx = (void*)world;
 
@@ -135,12 +147,7 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   }
  }
 
-/*
- for(size_t i = 0; i < world->_contacts._pool._size; i++) {
- 	oxb_contacthash2d_node *node = ((oxb_contacthash2d_node*)world->_contacts._pool._bytes) + i;
-  oxb_solver2d_contact_prepare(&node->_manifold, &world->_pool2d, &world->_input);
- }
-*/
+
  bool reset_frame = world->_island_frame == 0;
  if(reset_frame) {
   world->_island_frame = 0;
@@ -160,31 +167,65 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
  }
 
  if(reset_frame) {
- for(size_t i = 0; i < world->_pool2d._containers[0]._size; ++i) {
-  oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
-  oxb_dynamic2d_integrate(dynamic_body, world->_gravity, divided_dt);
-  oxb_bvh2d_update(&world->_bvh2d, dynamic_body->_bvh_id, dynamic_body->_aabb);
-  bool resting = (dynamic_body->_flags & OXB_FLAG_REST_2D) != 0;
-  dynamic_body->_island_id = oxb_island2d_acquire(&world->_island, resting);
- }
- } else {
- for(size_t i = 0; i < world->_pool2d._containers[0]._size; ++i) {
-  oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
-  oxb_dynamic2d_integrate(dynamic_body, world->_gravity, divided_dt);
-  oxb_bvh2d_update(&world->_bvh2d, dynamic_body->_bvh_id, dynamic_body->_aabb);
+  size_t i = 0;
+ 
+  for(; (i+4) <= world->_pool2d._containers[0]._size; i+=4) {
+   oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
+   oxb_dynamic2d_integrate4(dynamic_body, world, divided_dt);
 
-  if(oxb_pool_id_isnull(dynamic_body->_island_id)) {
-   bool resting = (dynamic_body->_flags & OXB_FLAG_REST_2D) != 0;
-   dynamic_body->_island_id = oxb_island2d_acquire(&world->_island, resting);
-  } else {
-   if(oxb_island2d_sleeping(&world->_island, dynamic_body->_island_id)) {
-    dynamic_body->_flags |= OXB_FLAG_SLEEP_2D;
-   } else {
-    dynamic_body->_flags &= ~OXB_FLAG_SLEEP_2D;
+   for(int j = 0; j < 4; j++) {
+   oxb_bvh2d_update(&world->_bvh2d, dynamic_body[j]._bvh_id, dynamic_body[j]._aabb);
+   bool resting = (dynamic_body[j]._flags & OXB_FLAG_REST_2D) != 0;
+   dynamic_body[j]._island_id = oxb_island2d_acquire(&world->_island, resting);
    }
   }
+ 
+  for(; i < world->_pool2d._containers[0]._size; ++i) {
+   oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
+   oxb_dynamic2d_integrate(dynamic_body, world, divided_dt);
+   oxb_bvh2d_update(&world->_bvh2d, dynamic_body->_bvh_id, dynamic_body->_aabb);
+   bool resting = (dynamic_body->_flags & OXB_FLAG_REST_2D) != 0;
+   dynamic_body->_island_id = oxb_island2d_acquire(&world->_island, resting);
+  }
+ } else {
+
+  size_t i = 0;
+ 
+  for(; (i+4) <= world->_pool2d._containers[0]._size; i+=4) {
+   oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
+   oxb_dynamic2d_integrate4(dynamic_body, world, divided_dt);
   
- }
+    for(int j = 0; j < 4; j++) {
+     oxb_bvh2d_update(&world->_bvh2d, dynamic_body[j]._bvh_id, dynamic_body[j]._aabb);
+     if(oxb_pool_id_isnull(dynamic_body[j]._island_id)) {
+      bool resting = (dynamic_body[j]._flags & OXB_FLAG_REST_2D) != 0;
+      dynamic_body[j]._island_id = oxb_island2d_acquire(&world->_island, resting);
+     } else {
+     if(oxb_island2d_sleeping(&world->_island, dynamic_body[j]._island_id)) {
+      dynamic_body[j]._flags |= OXB_FLAG_SLEEP_2D;
+     } else {
+      dynamic_body[j]._flags &= ~OXB_FLAG_SLEEP_2D;
+     }
+    }
+   }
+  }
+ 
+  for(; i < world->_pool2d._containers[0]._size; ++i) {
+   oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
+   oxb_dynamic2d_integrate(dynamic_body, world, divided_dt);
+   oxb_bvh2d_update(&world->_bvh2d, dynamic_body->_bvh_id, dynamic_body->_aabb);
+
+   if(oxb_pool_id_isnull(dynamic_body->_island_id)) {
+    bool resting = (dynamic_body->_flags & OXB_FLAG_REST_2D) != 0;
+    dynamic_body->_island_id = oxb_island2d_acquire(&world->_island, resting);
+   } else {
+    if(oxb_island2d_sleeping(&world->_island, dynamic_body->_island_id)) {
+     dynamic_body->_flags |= OXB_FLAG_SLEEP_2D;
+    } else {
+     dynamic_body->_flags &= ~OXB_FLAG_SLEEP_2D;
+    }
+   }
+  }
  
  } /* if reset island */
 
@@ -208,7 +249,7 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
 
 
 
-oxb_world2d* oxb_world2d_create(const oxb_world2d_info *oxb_restrict const info) {
+oxb_world2d* oxb_world2d_create(const oxb_world2d_info *oxb_restrict const info) { 
  oxb_world2d *world = (oxb_world2d*)oxb_aligned_alloc((oxb_allocator*)&info->_allocator, sizeof(oxb_world2d));
  if(oxb_unlikely(!world)) {
   OXB_PANIC("oxb_world2d_create() : allocation failed. ");
@@ -218,6 +259,8 @@ oxb_world2d* oxb_world2d_create(const oxb_world2d_info *oxb_restrict const info)
  world->_allocator = info->_allocator;
  world->_gravity = info->_gravity;
  world->_substeps = info->_substeps;
+ 
+ assert(info->_substeps != 0);
  
  oxb_pool2d_create(&world->_pool2d, &world->_allocator, 2);
  oxb_contacthash2d_create(&world->_contacts, &world->_allocator, 32);

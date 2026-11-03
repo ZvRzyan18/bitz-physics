@@ -95,7 +95,8 @@ typedef struct {
 } oxb_collider2d;
 
 void oxb_dynamic2d_init(oxb_dynamic2d *oxb_restrict const body, const oxb_object2d_info *oxb_restrict const info);
-void oxb_dynamic2d_integrate(oxb_dynamic2d *oxb_restrict const body, oxb_vec2 gravity, const float dt);
+void oxb_dynamic2d_integrate(oxb_dynamic2d *oxb_restrict const body, void *w, const float dt);
+void oxb_dynamic2d_integrate4(oxb_dynamic2d *oxb_restrict const body, void *w, const float dt);
 void oxb_dynamic2d_collider(oxb_collider2d *oxb_restrict const collider, const oxb_dynamic2d *oxb_restrict const body);
 
 void oxb_kinematic2d_init(oxb_kinematic2d *oxb_restrict const body, const oxb_object2d_info *oxb_restrict const info);

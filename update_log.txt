@@ -1,5 +1,15 @@
 # version 0.1.1
 
+• optimize sleeping
+
+• use unrolled simd based integration
+
+• improve arm neon simd support 
+
+• add body bvh query
+
+• add queue reset
+
 • fully implemented island2d
 
 • handle kinematic vs kinematic and kinematic vs static

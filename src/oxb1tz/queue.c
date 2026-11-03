@@ -54,4 +54,7 @@ void oxb_queue_pop(oxb_queue *oxb_restrict const c) {
  c->_size--;
 }
 
-
+void oxb_queue_reset(oxb_queue *oxb_restrict const c) {
+ c->_front = 0;
+ c->_size = 0;
+}
