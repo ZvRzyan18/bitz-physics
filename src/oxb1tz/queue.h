@@ -17,6 +17,7 @@ void oxb_queue_create(oxb_queue *oxb_restrict const c, oxb_allocator *oxb_restri
 void oxb_queue_destroy(oxb_queue *oxb_restrict const c);
 void oxb_queue_push(oxb_queue *oxb_restrict const c, const void *oxb_restrict const data);
 void oxb_queue_pop(oxb_queue *oxb_restrict const c);
+void oxb_queue_reset(oxb_queue *oxb_restrict const c);
 
 oxb_inline void* oxb_queue_front(oxb_queue *oxb_restrict const c) {
  assert(c->_size > 0);
