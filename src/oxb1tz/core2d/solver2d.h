@@ -10,6 +10,7 @@ typedef struct {
  float _mass_coeff;
  float _bias_coeff;
  float _inv_dt;
+ float _dt;
 } oxb_solver2d_input;
 
 void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input);

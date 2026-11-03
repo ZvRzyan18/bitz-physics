@@ -10,6 +10,8 @@
 void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
  uint32_t used_color = 0;
  bool both_kinematics = false;
+ bool both_sleeping = true;
+ 
  void *a_obj, *b_obj;
  
  oxb_vec2 a_velocity;
@@ -35,6 +37,7 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   	a_restitution = obj->_restitution;
   	a_omega = obj->_omega;
   	used_color |= obj->_color_bits;
+  	both_sleeping &= (obj->_flags & OXB_FLAG_SLEEP_2D) != 0;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -91,6 +94,7 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   	b_restitution = obj->_restitution;
   	b_omega = obj->_omega;
   	used_color |= obj->_color_bits;
+  	both_sleeping &= (obj->_flags & OXB_FLAG_SLEEP_2D) != 0;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -135,6 +139,9 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
    assert(0);
    oxb_unreachable();
  }
+ 
+ if(both_sleeping)
+  goto skip_solver;
 
  if(both_kinematics) {
  	oxb_kinematic2d *obj_a = (oxb_kinematic2d*)a_obj;
@@ -228,9 +235,64 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   float x = impact_speed * 0.2f;
   contact->_bias = (impact_speed * e) * oxb_tanh(oxb_min(x, 0.0f));
  }
+ 
+ skip_solver:
+ {
+ }
+ 
+ /* resting state */
+ const float vt = 1.2f;
+ const float vo = 0.4f;
+
+ if(m->_a._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
+ 	oxb_dynamic2d *body = (oxb_dynamic2d*)a_obj;
+  if(!(body->_flags & OXB_FLAG_REST_2D)) {
+   if(oxb_vec2_dot(a_velocity, a_velocity) < vt && oxb_abs(a_omega) < vo) {
+    body->_resting_time += input->_dt;
+    if(body->_resting_time > 1.5f) {
+     body->_flags |= OXB_FLAG_REST_2D;
+     a_velocity = oxb_vec2_mul(a_velocity, oxb_vec2_splat(0.3f));
+     a_omega *= 0.3f;
+     body->_resting_time = 0.0f;
+    }
+   } else {
+    body->_resting_time = 0.0f;
+   }
+  } else {
+   if(oxb_vec2_dot(a_velocity, a_velocity) > vt || oxb_abs(a_omega) > vo) {
+    body->_resting_time = 0.0f;
+    body->_flags &= ~OXB_FLAG_REST_2D;
+   }
+  }
+ }
 
 
- /* color creation for multi thread support later. */
+
+ if(m->_b._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
+ 	oxb_dynamic2d *body = (oxb_dynamic2d*)b_obj;
+  if(!(body->_flags & OXB_FLAG_REST_2D)) {
+   if(oxb_vec2_dot(b_velocity, b_velocity) < vt && oxb_abs(b_omega) < vo) {
+    body->_resting_time += input->_dt;
+    if(body->_resting_time > 1.5f) {
+     body->_flags |= OXB_FLAG_REST_2D;
+     b_velocity = oxb_vec2_mul(b_velocity, oxb_vec2_splat(0.3f));
+     b_omega *= 0.3f;
+     body->_resting_time = 0.0f;
+    }
+   } else {
+    body->_resting_time = 0.0f;
+   }
+  } else {
+   if(oxb_vec2_dot(b_velocity, b_velocity) > vt || oxb_abs(b_omega) > vo) {
+    body->_resting_time = 0.0f;
+    body->_flags &= ~OXB_FLAG_REST_2D;
+   }
+  }
+ }
+ 
+ 
+ 
+ /* color creation for parallel solver. */
  uint32_t color = 0;
 
  while(color < 32 && (used_color & (1u << color)))
@@ -256,6 +318,8 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   {
   	oxb_dynamic2d *obj = (oxb_dynamic2d*)a_obj;
   	obj->_color_bits |= color_bit;
+  	oxb_vec2_store(obj->_velocity._arr, a_velocity);
+  	obj->_omega = a_omega;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -271,6 +335,8 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   {
   	oxb_dynamic2d *obj = (oxb_dynamic2d*)b_obj;
   	obj->_color_bits |= color_bit;
+  	oxb_vec2_store(obj->_velocity._arr, b_velocity);
+  	obj->_omega = b_omega;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -286,6 +352,7 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
 
 void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
  bool both_kinematics = false;
+ bool both_sleeping = true;
  
  void *a_obj;
  oxb_vec2 a_velocity;
@@ -310,6 +377,7 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
   	a_inv_mass = obj->_inv_mass;
   	a_inv_inertia = obj->_inv_rotational_inertia;
   	a_omega = obj->_omega;
+  	both_sleeping &= (obj->_flags & OXB_FLAG_SLEEP_2D) != 0;  	
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -358,6 +426,7 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
   	b_inv_mass = obj->_inv_mass;
   	b_inv_inertia = obj->_inv_rotational_inertia;
   	b_omega = obj->_omega;
+  	both_sleeping &= (obj->_flags & OXB_FLAG_SLEEP_2D) != 0;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -396,6 +465,9 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
    assert(0);
    oxb_unreachable();
  }
+ 
+ if(both_sleeping)
+  return;
 
  bool both_dynamic = m->_a._type == m->_b._type && m->_a._type == OXB_POOL2D_TYPE_DYNAMIC_2D;
  if(both_dynamic) {
@@ -491,6 +563,8 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
 
 void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
  bool both_kinematics = false;
+ bool both_sleeping = true;
+ 
  void *a_obj;
  oxb_vec2 a_velocity;
  float a_inv_mass;
@@ -518,6 +592,7 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
   	a_omega = obj->_omega;
    a_static_friction = obj->_friction._arr[0];
    a_dynamic_friction = obj->_friction._arr[1];
+  	both_sleeping &= (obj->_flags & OXB_FLAG_SLEEP_2D) != 0;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -577,6 +652,7 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
   	b_omega = obj->_omega;
    b_static_friction = obj->_friction._arr[0];
    b_dynamic_friction = obj->_friction._arr[1];
+  	both_sleeping &= (obj->_flags & OXB_FLAG_SLEEP_2D) != 0;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -624,6 +700,9 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
    assert(0);
    oxb_unreachable();
  }
+ 
+ if(both_sleeping)
+  return;
  
  bool both_dynamic = m->_a._type == m->_b._type && m->_a._type == OXB_POOL2D_TYPE_DYNAMIC_2D;
  if(both_dynamic) {
@@ -674,7 +753,7 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
 		float vn = oxb_vec2_dot(relative_vel, normal);
 
 
-  float slop = 0.08f;
+  float slop = 0.03f;
   float penetration_error = 0.0f;
   
   if(depth < 0.0f) {

@@ -17,12 +17,17 @@ struct oxb_world2d {
  oxb_island2d       _island;
  
  oxb_vec2           _gravity;
+  
  
+ float              _dt;
  uint32_t           _colors[32];
  uint32_t           _solo_manifolds;
- float              _dt;
+ 
  uint8_t            _substeps;
  uint8_t            _island_frame;
+ 
+ 
+ uint8_t            _worker_count;
 };
 
 oxb_world2d* oxb_world2d_create(const oxb_world2d_info *oxb_restrict const info);
@@ -30,7 +35,4 @@ void oxb_world2d_destroy(oxb_world2d *oxb_restrict const world);
 oxb_pool2d* oxb_world2d_getpool2d(oxb_world2d *oxb_restrict const world);
 void oxb_world2d_step(oxb_world2d *oxb_restrict const world, const float dt);
 
-
 #endif
-
-

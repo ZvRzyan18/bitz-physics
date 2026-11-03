@@ -38,6 +38,7 @@ void oxb_bvh2d_update(oxb_bvh2d *oxb_restrict const bvh, const oxb_pool_id id, c
 oxb_pool_id oxb_bvh2d_insert(oxb_bvh2d *oxb_restrict const bvh, const oxb_aabb2d fit, const oxb_handle body_id);
 void oxb_bvh2d_remove(oxb_bvh2d *oxb_restrict const bvh, const oxb_pool_id id);
 void oxb_bvh2d_traversepairs(oxb_bvh2d *oxb_restrict const bvh, void (*func)(oxb_handle, oxb_handle, void*), void *ptr);
+void oxb_bvh2d_traversebody(oxb_bvh2d *oxb_restrict const bvh, void (*func)(oxb_handle, oxb_handle, void*), void *ptr, const oxb_pool_id id);
 void oxb_bvh2d_mediansplit(oxb_bvh2d *oxb_restrict const bvh, oxb_pool2d *oxb_restrict pool2d);
 bool oxb_bvh2d_shouldrebuild(oxb_bvh2d *oxb_restrict const bvh, const uint8_t frame_tolerance);
 

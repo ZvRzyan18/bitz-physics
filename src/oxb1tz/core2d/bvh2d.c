@@ -522,6 +522,34 @@ oxb_noinline static void traverse_self_recursive(oxb_bvh2d *const bvh, oxb_pool_
  traverse_pair_recursive(bvh, n->_left, n->_right, func, ptr, depth + 1, info);
 }
 
+/* query collision for each body (thread safety) */
+oxb_noinline static void traverse_single_body(oxb_bvh2d *const bvh, oxb_pool_id t, void (*func)(oxb_handle, oxb_handle, void *), void *ptr, const oxb_pool_id id, uint32_t depth, oxb_bvh2d_traversalinfo *info) {
+ if(oxb_pool_id_isnull(t))
+  return;
+
+ if(oxb_pool_id_isequal(id, t))
+  return;
+  
+ oxb_bvh2d_node *a = (oxb_bvh2d_node*)oxb_pool_get(&bvh->_pool, id);
+ oxb_bvh2d_node *b = (oxb_bvh2d_node*)oxb_pool_get(&bvh->_pool, t);
+ 
+ assert(is_leaf(*a));
+ if(!overlaps(a->_aabb, b->_aabb))
+  return;
+
+ if(is_leaf(*b)) {
+  info->_pair_test++;
+  func(a->_body, b->_body, ptr);
+  return;
+ }
+
+ info->_node_visits++;
+ info->_max_depth = info->_max_depth < depth ? depth : info->_max_depth;
+
+ traverse_single_body(bvh, b->_left, func, ptr, id, depth + 1, info);
+ traverse_single_body(bvh, b->_right, func, ptr, id, depth + 1, info);
+}
+
 
 oxb_noinline static void traverse_delete_non_leaf(oxb_bvh2d *const bvh, oxb_pool_id n) {
  if(oxb_pool_id_isnull(n)) {
@@ -871,6 +899,25 @@ void oxb_bvh2d_traversepairs(oxb_bvh2d *oxb_restrict const bvh, void (*func)(oxb
   bvh->_frame_tolerance = 0;
 }
 
+
+void oxb_bvh2d_traversebody(oxb_bvh2d *oxb_restrict const bvh, void (*func)(oxb_handle, oxb_handle, void*), void *ptr, const oxb_pool_id id) {
+ oxb_bvh2d_traversalinfo tree_info;
+ oxb_memory_set(&tree_info, 0, sizeof(oxb_bvh2d_traversalinfo));
+ traverse_single_body(bvh, bvh->_root, func, ptr, id, 0, &tree_info);
+ 
+ float tolerance_factor = 2.5f;
+ float log_n = oxb_log2((float)bvh->_leaf_size);
+ uint32_t max_depth = oxb_round(tolerance_factor * log_n);
+ 
+ int ca = tree_info._max_depth > max_depth;
+ int cb = tree_info._node_visits > (bvh->_leaf_size * 20u);
+ int cc = tree_info._pair_test > (bvh->_leaf_size * 40u);
+
+ if(ca && cb && cc)
+  bvh->_frame_tolerance++;
+ else
+  bvh->_frame_tolerance = 0;
+}
 
 
 void oxb_bvh2d_mediansplit(oxb_bvh2d *oxb_restrict const bvh, oxb_pool2d *oxb_restrict pool2d) {
