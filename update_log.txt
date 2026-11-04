@@ -1,5 +1,7 @@
 # version 0.1.1
 
+• improve simd via mask vector
+
 • optimize sleeping
 
 • use unrolled simd based integration
