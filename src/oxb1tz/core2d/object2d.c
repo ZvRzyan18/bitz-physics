@@ -2,11 +2,12 @@
 #include "oxb1tz/core2d/world2d.h"
 #include "oxb1tz/memory.h"
 #include "oxb1tz/simd.h"
+#include "oxb1tz/mask.h"
 
 
-oxb_noinline static oxb_aabb2d update_aabb(const oxb_packedshape2d shape, const oxb_vec2 pos, const oxb_complex rot, uint8_t shape_type) {
+oxb_noinline static oxb_aabb2d update_aabb(const oxb_packedshape2d shape, const oxb_vec2 pos, const oxb_complex rot, const uint8_t shape_type) {
  oxb_aabb2d out;
- switch(shape_type & OXB_SHAPE_MASK_2D) {
+ switch(shape_type) {
   case OXB_SHAPE_BOX_2D:
   {
    oxb_vec2 r = oxb_vec2_abs(rot);
@@ -113,16 +114,23 @@ void oxb_dynamic2d_integrate(oxb_dynamic2d *oxb_restrict const body, void *w, co
  oxb_vec2 linear_damping = oxb_vec2_splat(oxb_vec2_getx(damping));
  float angular_damping = oxb_vec2_gety(damping);
 
-/*
- oxb_vec2 linear_damping = oxb_vec2_splat(oxb_exp2(body->_damping._arr[0] * dt));
- float angular_damping = oxb_exp2(body->_damping._arr[1] * dt);
-*/
  oxb_compiler_memory_barrier();
  
  velocity = oxb_vec2_fma(linear_acceleration, dt_vec, velocity);
  
  velocity = oxb_vec2_mul(velocity, linear_damping);
  omega *= angular_damping;
+
+
+ /* lock the position and rotation */
+ static const oxb_mask3 poslock_mask = OXB_MASK3_INIT((uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSY_2D, (uint32_t)OXB_FLAG_LOCK_ROT_2D);
+ static const oxb_mask3 zero_mask = OXB_MASK3_INIT(0, 0, 0);
+ oxb_mask3 locks = oxb_mask3_splat((uint32_t)body->_flags);
+ locks = oxb_mask3_equal(oxb_mask3_and(locks, poslock_mask), zero_mask);
+ oxb_vec3 movement_tmp = OXB_VEC3_INIT(oxb_vec2_getx(velocity), oxb_vec2_gety(velocity), omega);
+ movement_tmp = oxb_mask3_tovec3(oxb_mask3_and(oxb_mask3_fromvec3(movement_tmp), locks));
+ velocity = oxb_vec3_low(movement_tmp);
+ omega = oxb_vec3_getz(movement_tmp);
 
 
  float delta_omega = omega * dt;
@@ -133,7 +141,7 @@ void oxb_dynamic2d_integrate(oxb_dynamic2d *oxb_restrict const body, void *w, co
 
  rotation = oxb_complex_mul(omega_complex, rotation);
  rotation = oxb_vec2_normalize(rotation);
-  
+
  position = oxb_vec2_fma(velocity, dt_vec, position);   
 
 
@@ -150,7 +158,7 @@ void oxb_dynamic2d_integrate(oxb_dynamic2d *oxb_restrict const body, void *w, co
 void oxb_dynamic2d_integrate4(oxb_dynamic2d *oxb_restrict const body, void *w, const float dt) {
  oxb_world2d *world = (oxb_world2d*)w;
  
- oxb_dynamic2d_batch batch = {0};
+ oxb_dynamic2d_batch4 batch = {0};
  
  for(size_t i = 0; i < 4; i++) {
   body[i]._color_bits = 0;
@@ -166,10 +174,11 @@ void oxb_dynamic2d_integrate4(oxb_dynamic2d *oxb_restrict const body, void *w, c
   batch._omega = oxb_vec4_set(batch._omega, i, body[i]._omega);
   batch._linear_damping = oxb_vec4_set(batch._linear_damping, i, body[i]._damping._arr[0]);
   batch._angular_damping = oxb_vec4_set(batch._angular_damping, i, body[i]._damping._arr[1]);
+  batch._flags = oxb_mask4_set(batch._flags, i, body[i]._flags);
  }
  
  
- oxb_integrate_dynamic4(&batch, world->_gravity, oxb_vec4_splat(dt));
+ oxb_integrate2d_dynamic4(&batch, world->_gravity, oxb_vec4_splat(dt));
   
  for(size_t i = 0; i < 4; i++) {
   if(body[i]._flags & OXB_FLAG_SLEEP_2D)
@@ -183,13 +192,11 @@ void oxb_dynamic2d_integrate4(oxb_dynamic2d *oxb_restrict const body, void *w, c
   body[i]._velocity._arr[0] = oxb_vec4_get(batch._velocity_x, i);
   body[i]._velocity._arr[1] = oxb_vec4_get(batch._velocity_y, i);
 
-  body[i]._omega = oxb_vec4_get(batch._omega, i);
-  body[i]._damping._arr[0] = oxb_vec4_get(batch._linear_damping, i);
-  body[i]._damping._arr[1] = oxb_vec4_get(batch._angular_damping, i);
-   
+  body[i]._omega = oxb_vec4_get(batch._omega, i);   
   body[i]._aabb = update_aabb(body[i]._shape, oxb_vec2_load(body[i]._position._arr), oxb_vec2_load(body[i]._rotation._arr), body[i]._flags & OXB_SHAPE_MASK_2D);
  }
 }
+
 
 void oxb_dynamic2d_collider(oxb_collider2d *oxb_restrict const collider, const oxb_dynamic2d *oxb_restrict const body) {
  collider->_shape = body->_shape;
@@ -266,15 +273,22 @@ void oxb_kinematic2d_integrate(oxb_kinematic2d *oxb_restrict const body, const f
  oxb_vec2 damping = oxb_vec2_exp2(oxb_vec2_mul(oxb_vec2_load(body->_damping._arr), dt_vec));
  oxb_vec2 linear_damping = oxb_vec2_splat(oxb_vec2_getx(damping));
  float angular_damping = oxb_vec2_gety(damping);
-/*
- oxb_vec2 linear_damping = oxb_vec2_splat(oxb_exp2(body->_damping._arr[0] * dt));
- float angular_damping = oxb_exp2(body->_damping._arr[1] * dt);
-*/
 
  oxb_compiler_memory_barrier();
   
  velocity = oxb_vec2_mul(velocity, linear_damping);
  omega *= angular_damping;
+
+
+ /* lock the position and rotation */
+ static const oxb_mask3 poslock_mask = OXB_MASK3_INIT((uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSY_2D, (uint32_t)OXB_FLAG_LOCK_ROT_2D);
+ static const oxb_mask3 zero_mask = OXB_MASK3_INIT(0, 0, 0);
+ oxb_mask3 locks = oxb_mask3_splat((uint32_t)body->_flags);
+ locks = oxb_mask3_equal(oxb_mask3_and(locks, poslock_mask), zero_mask);
+ oxb_vec3 movement_tmp = OXB_VEC3_INIT(oxb_vec2_getx(velocity), oxb_vec2_gety(velocity), omega);
+ movement_tmp = oxb_mask3_tovec3(oxb_mask3_and(oxb_mask3_fromvec3(movement_tmp), locks));
+ velocity = oxb_vec3_low(movement_tmp);
+ omega = oxb_vec3_getz(movement_tmp);
 
 
  float delta_omega = omega * dt;

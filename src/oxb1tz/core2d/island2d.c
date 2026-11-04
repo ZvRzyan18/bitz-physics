@@ -35,6 +35,7 @@ oxb_pool_id oxb_island2d_acquire(oxb_island2d *oxb_restrict const island, const 
 }
 
 
+/* simple find, with path compression */
 oxb_pool_id oxb_island2d_find(oxb_island2d *oxb_restrict const island, const oxb_pool_id h) {
  oxb_island2d_node *node = oxb_pool_get(&island->_node_pool, h);
  if(!oxb_pool_id_isequal(node->_leader, h)) 

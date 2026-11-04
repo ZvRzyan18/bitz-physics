@@ -904,7 +904,7 @@ void oxb_bvh2d_traversebody(oxb_bvh2d *oxb_restrict const bvh, void (*func)(oxb_
  oxb_bvh2d_traversalinfo tree_info;
  oxb_memory_set(&tree_info, 0, sizeof(oxb_bvh2d_traversalinfo));
  traverse_single_body(bvh, bvh->_root, func, ptr, id, 0, &tree_info);
- 
+/*
  float tolerance_factor = 2.5f;
  float log_n = oxb_log2((float)bvh->_leaf_size);
  uint32_t max_depth = oxb_round(tolerance_factor * log_n);
@@ -917,6 +917,7 @@ void oxb_bvh2d_traversebody(oxb_bvh2d *oxb_restrict const bvh, void (*func)(oxb_
   bvh->_frame_tolerance++;
  else
   bvh->_frame_tolerance = 0;
+ */
 }
 
 

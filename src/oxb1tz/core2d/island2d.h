@@ -32,7 +32,6 @@ typedef struct {
 void oxb_island2d_create(oxb_island2d *oxb_restrict const island, oxb_allocator *oxb_restrict const alloc, const size_t pool_reserve, const size_t container_reserve);
 void oxb_island2d_destroy(oxb_island2d *oxb_restrict const island);
 oxb_pool_id oxb_island2d_acquire(oxb_island2d *oxb_restrict const island, const bool resting);
-
 oxb_pool_id oxb_island2d_find(oxb_island2d *oxb_restrict const island, const oxb_pool_id h);
 void oxb_island2d_merge(oxb_island2d *oxb_restrict const island, const oxb_pool_id a, const oxb_pool_id b);
 void oxb_island2d_reset(oxb_island2d *oxb_restrict const island);

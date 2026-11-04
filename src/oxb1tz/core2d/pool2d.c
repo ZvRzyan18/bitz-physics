@@ -205,7 +205,7 @@ void oxb_pool2d_addforce(oxb_pool2d *oxb_restrict const pool, const oxb_handle i
    oxb_vec2 velocity = oxb_vec2_load(body->_velocity._arr);
    oxb_vec2 inv_mass = oxb_vec2_splat(body->_inv_mass);
    oxb_vec2 acceleration = oxb_vec2_mul(v, inv_mass);
-   velocity = oxb_vec2_fma(acceleration, oxb_vec2_splat(world->_dt), velocity);
+   velocity = oxb_vec2_fma(acceleration, oxb_vec2_splat(world->_input._dt), velocity);
    oxb_vec2_store(body->_velocity._arr, velocity);
   }
   break;
@@ -237,7 +237,7 @@ void oxb_pool2d_addtorque(oxb_pool2d *oxb_restrict const pool, const oxb_handle 
    float omega = body->_omega;
    float inv_inertia = body->_inv_rotational_inertia;
    float acceleration = v * inv_inertia;
-   omega = oxb_fma(acceleration, world->_dt, omega);
+   omega = oxb_fma(acceleration, world->_input._dt, omega);
    body->_omega = omega;
   }
   break;

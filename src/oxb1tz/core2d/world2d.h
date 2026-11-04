@@ -8,6 +8,7 @@
 #include "oxb1tz/core2d/solver2d.h"
 #include "oxb1tz/core2d/island2d.h"
 
+
 struct oxb_world2d {
  oxb_allocator      _allocator;
  oxb_pool2d         _pool2d;
@@ -19,15 +20,12 @@ struct oxb_world2d {
  oxb_vec2           _gravity;
   
  
- float              _dt;
  uint32_t           _colors[32];
  uint32_t           _solo_manifolds;
  
  uint8_t            _substeps;
  uint8_t            _island_frame;
  
- 
- uint8_t            _worker_count;
 };
 
 oxb_world2d* oxb_world2d_create(const oxb_world2d_info *oxb_restrict const info);
