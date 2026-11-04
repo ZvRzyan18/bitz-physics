@@ -6,10 +6,6 @@
 
 #include <assert.h>
 
-#if defined(OXB_NDEBUG) && !defined(NDEBUG)
-#define NDEBUG
-#endif
-
 /*
  restrict keyword
 */
