@@ -2,7 +2,8 @@
 #define OXB_SIMD_H
 
 #include "oxb1tz/vector.h"
-#include "oxb1tz/container.h"
+#include "oxb1tz/mask.h"
+#include "oxb1tz/core2d.h"
 
 oxb_inline oxb_vec2 oxb_vec2_log2(oxb_vec2 x) {
 	oxb_vec2 out;
@@ -114,6 +115,10 @@ oxb_inline oxb_vec4 oxb_vec4_sqrt(oxb_vec4 x) {
  return out;
 }
 
+
+/*
+ batch integration 
+*/
 typedef struct {
  oxb_vec4 _position_x;
  oxb_vec4 _position_y;
@@ -126,10 +131,11 @@ typedef struct {
 
  oxb_vec4 _omega;
  oxb_vec4 _linear_damping;
- oxb_vec4 _angular_damping; 
-} oxb_dynamic2d_batch;
+ oxb_vec4 _angular_damping;
+ oxb_mask4 _flags;
+} oxb_dynamic2d_batch4;
 
-oxb_inline void oxb_integrate_dynamic4(oxb_dynamic2d_batch *batch, oxb_vec2 gravity, oxb_vec4 dt_vec) {
+oxb_inline void oxb_integrate2d_dynamic4(oxb_dynamic2d_batch4 *batch, oxb_vec2 gravity, oxb_vec4 dt_vec) {
  oxb_vec4 gravity_x = oxb_vec4_splat(oxb_vec2_getx(gravity));
  oxb_vec4 gravity_y = oxb_vec4_splat(oxb_vec2_gety(gravity));
 
@@ -140,6 +146,23 @@ oxb_inline void oxb_integrate_dynamic4(oxb_dynamic2d_batch *batch, oxb_vec2 grav
  batch->_velocity_x = oxb_vec4_mul(batch->_velocity_x, linear_damp);
  batch->_velocity_y = oxb_vec4_mul(batch->_velocity_y, linear_damp);
  batch->_omega = oxb_vec4_mul(batch->_omega, oxb_vec4_exp2(oxb_vec4_mul(batch->_angular_damping, dt_vec)));
+
+
+ /* lock mask */
+ static const oxb_mask4 posx_lock = OXB_MASK4_INIT((uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSX_2D);
+ static const oxb_mask4 posy_lock = OXB_MASK4_INIT((uint32_t)OXB_FLAG_LOCK_POSY_2D, (uint32_t)OXB_FLAG_LOCK_POSY_2D, (uint32_t)OXB_FLAG_LOCK_POSY_2D, (uint32_t)OXB_FLAG_LOCK_POSY_2D);
+ static const oxb_mask4 rot_lock = OXB_MASK4_INIT((uint32_t)OXB_FLAG_LOCK_ROT_2D, (uint32_t)OXB_FLAG_LOCK_ROT_2D, (uint32_t)OXB_FLAG_LOCK_ROT_2D, (uint32_t)OXB_FLAG_LOCK_ROT_2D);
+
+ static const oxb_mask4 zero_mask = OXB_MASK4_INIT(0, 0, 0, 0);
+
+ oxb_mask4 lock_x = oxb_mask4_equal(oxb_mask4_and(batch->_flags, posx_lock), zero_mask);
+ oxb_mask4 lock_y = oxb_mask4_equal(oxb_mask4_and(batch->_flags, posy_lock), zero_mask);
+ oxb_mask4 lock_rot = oxb_mask4_equal(oxb_mask4_and(batch->_flags, rot_lock), zero_mask);
+
+ batch->_velocity_x = oxb_mask4_tovec4(oxb_mask4_and(oxb_mask4_fromvec4(batch->_velocity_x), lock_x));
+ batch->_velocity_y = oxb_mask4_tovec4(oxb_mask4_and(oxb_mask4_fromvec4(batch->_velocity_y), lock_y));
+ batch->_omega = oxb_mask4_tovec4(oxb_mask4_and(oxb_mask4_fromvec4(batch->_omega), lock_rot));
+
 
  oxb_vec4 delta_omega = oxb_vec4_mul(batch->_omega, dt_vec);
  static const oxb_vec4 one = OXB_VEC4_INIT(1.0f, 1.0f, 1.0f, 1.0f);
@@ -163,6 +186,8 @@ oxb_inline void oxb_integrate_dynamic4(oxb_dynamic2d_batch *batch, oxb_vec2 grav
  batch->_position_x = oxb_vec4_fma(batch->_velocity_x, dt_vec, batch->_position_x);   
  batch->_position_y = oxb_vec4_fma(batch->_velocity_y, dt_vec, batch->_position_y);   
 }
+
+
 
 #endif
 

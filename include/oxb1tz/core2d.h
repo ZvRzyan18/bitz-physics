@@ -39,9 +39,20 @@ typedef enum {
 typedef struct oxb_world2d oxb_world2d;
 typedef struct oxb_pool2d oxb_pool2d;
 
+typedef void (*oxb_core2d_process)(void *ctx);
+typedef void* (*oxb_core2d_enqueue)(oxb_core2d_process p, void *ctx, uint8_t id);
+typedef bool (*oxb_core2d_isfinished)(void *fence);
+typedef void (*oxb_core2d_wait)(void *fence);
+
 
 typedef struct {
  oxb_allocator _allocator;
+ 
+ oxb_core2d_enqueue _worker_enqueue;
+ oxb_core2d_isfinished _fence_isfinished;
+ oxb_core2d_wait    _fence_wait;
+ uint8_t            _worker_count;
+ 
  oxb_vec2 _gravity;
  uint8_t  _substeps;
 } oxb_world2d_info;

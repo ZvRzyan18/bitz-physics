@@ -28,7 +28,6 @@ oxb_noinline static void broadphase_query(oxb_handle ha, oxb_handle hb, void *w)
   }
  }
 
-
  bool both_dynamic = ha._type == hb._type && ha._type == OXB_POOL2D_TYPE_DYNAMIC_2D;
  bool reset_frame = world->_island_frame == 0;
  oxb_dynamic2d *obj_a = NULL;
@@ -46,8 +45,6 @@ oxb_noinline static void broadphase_query(oxb_handle ha, oxb_handle hb, void *w)
   }
  }
 
-
- 
  /* narrowphase */
  oxb_manifold2d m;
  oxb_memory_set(&m, 0x00, sizeof(oxb_manifold2d));
@@ -63,7 +60,6 @@ oxb_noinline static void broadphase_query(oxb_handle ha, oxb_handle hb, void *w)
   node->_manifold._flags |= OXB_MANIFOLD2D_QUERIED;
   oxb_manifold2d_combine(&node->_manifold, &m);
  }
-
 
  /* DSU merging */
  if(both_dynamic) {
@@ -88,7 +84,6 @@ oxb_noinline static void broadphase_query(oxb_handle ha, oxb_handle hb, void *w)
 
 
 oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const world, const float dt) {
- world->_dt = dt;
  float divided_dt = dt / (float)world->_substeps;
 
  /* collisionphase */
@@ -96,20 +91,7 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   oxb_bvh2d_mediansplit(&world->_bvh2d, &world->_pool2d);
 
  oxb_bvh2d_traversepairs(&world->_bvh2d, broadphase_query, world);
-/*
- for(size_t i = 0; i < world->_pool2d._containers[0]._size; ++i) {
-  oxb_dynamic2d *body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
-  oxb_bvh2d_traversebody(&world->_bvh2d, broadphase_query, world, body->_bvh_id);
- }
- for(size_t i = 0; i < world->_pool2d._containers[1]._size; ++i) {
-  oxb_kinematic2d *body = ((oxb_kinematic2d*)world->_pool2d._containers[1]._bytes) + i;
-  oxb_bvh2d_traversebody(&world->_bvh2d, broadphase_query, world, body->_bvh_id);
- }
- for(size_t i = 0; i < world->_pool2d._containers[2]._size; ++i) {
-  oxb_static2d *body = ((oxb_static2d*)world->_pool2d._containers[2]._bytes) + i;
-  oxb_bvh2d_traversebody(&world->_bvh2d, broadphase_query, world, body->_bvh_id);
- }
-*/
+
  float damping_ratio = 2.6f;
  float hertz = 9.33f;
  float soft_dt = dt;
@@ -153,9 +135,9 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   world->_island_frame = 0;
   oxb_island2d_reset(&world->_island);
  }
- 
- for(size_t iteration = 0; iteration < world->_substeps; iteration++) {
 
+ {
+ 	
  for(size_t i = 0; i < world->_contacts._pool._size; i++) {
  	oxb_contacthash2d_node *node = ((oxb_contacthash2d_node*)world->_contacts._pool._bytes) + i;
   oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
@@ -172,8 +154,8 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   for(; (i+4) <= world->_pool2d._containers[0]._size; i+=4) {
    oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
    oxb_dynamic2d_integrate4(dynamic_body, world, divided_dt);
-
-   for(int j = 0; j < 4; j++) {
+ 
+   for(size_t j = 0; j < 4; j++) {
    oxb_bvh2d_update(&world->_bvh2d, dynamic_body[j]._bvh_id, dynamic_body[j]._aabb);
    bool resting = (dynamic_body[j]._flags & OXB_FLAG_REST_2D) != 0;
    dynamic_body[j]._island_id = oxb_island2d_acquire(&world->_island, resting);
@@ -190,12 +172,11 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
  } else {
 
   size_t i = 0;
- 
   for(; (i+4) <= world->_pool2d._containers[0]._size; i+=4) {
    oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
    oxb_dynamic2d_integrate4(dynamic_body, world, divided_dt);
-  
-    for(int j = 0; j < 4; j++) {
+ 
+    for(size_t j = 0; j < 4; j++) {
      oxb_bvh2d_update(&world->_bvh2d, dynamic_body[j]._bvh_id, dynamic_body[j]._aabb);
      if(oxb_pool_id_isnull(dynamic_body[j]._island_id)) {
       bool resting = (dynamic_body[j]._flags & OXB_FLAG_REST_2D) != 0;
@@ -234,11 +215,54 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   oxb_solver2d_contact_solve(&node->_manifold, &world->_pool2d, &world->_input);
  }
  
+ }
+ 
+ 
+ 
+ 
+ for(size_t iteration = 1; iteration < world->_substeps; iteration++) {
+
+ for(size_t i = 0; i < world->_contacts._pool._size; i++) {
+ 	oxb_contacthash2d_node *node = ((oxb_contacthash2d_node*)world->_contacts._pool._bytes) + i;
+  oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
+ }
+
+ for(size_t i = 0; i < world->_contacts._pool._size; i++) {
+ 	oxb_contacthash2d_node *node = ((oxb_contacthash2d_node*)world->_contacts._pool._bytes) + i;
+  oxb_solver2d_contact_solve(&node->_manifold, &world->_pool2d, &world->_input);
+ }
+
+
+ size_t i = 0;
+ for(; (i+4) <= world->_pool2d._containers[0]._size; i+=4) {
+  oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
+  oxb_dynamic2d_integrate4(dynamic_body, world, divided_dt);
+ }
+ 
+ for(; i < world->_pool2d._containers[0]._size; ++i) {
+  oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[0]._bytes) + i;
+  oxb_dynamic2d_integrate(dynamic_body, world, divided_dt);
+ }
+ 
+
+ for(size_t i = 0; i < world->_contacts._pool._size; i++) {
+ 	oxb_contacthash2d_node *node = ((oxb_contacthash2d_node*)world->_contacts._pool._bytes) + i;
+  oxb_solver2d_contact_solve(&node->_manifold, &world->_pool2d, &world->_input);
+ }
+ 
  } /* iteration */
 
 
  world->_island_frame++;
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -261,6 +285,7 @@ oxb_world2d* oxb_world2d_create(const oxb_world2d_info *oxb_restrict const info)
  world->_substeps = info->_substeps;
  
  assert(info->_substeps != 0);
+ 
  
  oxb_pool2d_create(&world->_pool2d, &world->_allocator, 2);
  oxb_contacthash2d_create(&world->_contacts, &world->_allocator, 32);
