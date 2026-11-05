@@ -165,7 +165,7 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
  }
 
  float inv_mass = a_inv_mass + b_inv_mass;
- float e = oxb_min(a_restitution, b_restitution);
+ float e = oxb_max(a_restitution, b_restitution);
 
  
  for(uint8_t i = 0; i < m->_contact_count; i++) {
@@ -232,7 +232,7 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   -------------------------------------
   
   */
-  float x = impact_speed * 0.2f;
+  float x = impact_speed;
   contact->_bias = (impact_speed * e) * oxb_tanh(oxb_min(x, 0.0f));
  }
  
@@ -262,7 +262,7 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
    if(oxb_vec2_dot(a_velocity, a_velocity) > vt || oxb_abs(a_omega) > vo) {
     body->_resting_time = 0.0f;
     body->_flags &= ~OXB_FLAG_REST_2D;
-   }
+   } 
   }
  }
 
@@ -299,19 +299,20 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   ++color;
  
  oxb_world2d *world = (oxb_world2d*)input->_ctx;
- 
+
+ m->_flags &= ~OXB_MANIFOLD2D_SOLO;
+ m->_flags &= ~OXB_MANIFOLD2D_COLOR;
+ uint32_t color_bit = 0;
+
  if(color >= 32) {
   m->_flags |= OXB_MANIFOLD2D_SOLO;
   world->_solo_manifolds++;
-  return;
+  color_bit = 0;
+ } else {
+  world->_colors[color]++;
+  m->_flags |= (uint8_t)(color & OXB_MANIFOLD2D_COLOR);
+  color_bit = 1u << color;
  }
- world->_colors[color]++;
-
-
-
- m->_flags = (uint8_t)(color & OXB_MANIFOLD2D_COLOR);
-
- const uint32_t color_bit = 1u << color;
 
  switch(m->_a._type) {
   case OXB_POOL2D_TYPE_DYNAMIC_2D:

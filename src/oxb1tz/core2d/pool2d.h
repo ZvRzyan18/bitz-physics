@@ -3,6 +3,7 @@
 
 #include "oxb1tz/container.h"
 #include "oxb1tz/core2d/object2d.h"
+#include "oxb1tz/core2d/joint2d.h"
 #include "oxb1tz/core2d.h"
 
 /*

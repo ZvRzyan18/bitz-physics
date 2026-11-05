@@ -5,6 +5,9 @@
 #include "oxb1tz/mask.h"
 #include "oxb1tz/core2d.h"
 
+/*
+ simd implemented functions
+*/
 oxb_inline oxb_vec2 oxb_vec2_log2(oxb_vec2 x) {
 	oxb_vec2 out;
 #ifdef OXB_NEON
@@ -117,7 +120,8 @@ oxb_inline oxb_vec4 oxb_vec4_sqrt(oxb_vec4 x) {
 
 
 /*
- batch integration 
+ batch integration, has to be performed with
+ gather + scatter.
 */
 typedef struct {
  oxb_vec4 _position_x;
@@ -186,7 +190,6 @@ oxb_inline void oxb_integrate2d_dynamic4(oxb_dynamic2d_batch4 *batch, oxb_vec2 g
  batch->_position_x = oxb_vec4_fma(batch->_velocity_x, dt_vec, batch->_position_x);   
  batch->_position_y = oxb_vec4_fma(batch->_velocity_y, dt_vec, batch->_position_y);   
 }
-
 
 
 #endif

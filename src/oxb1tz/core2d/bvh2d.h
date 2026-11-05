@@ -29,6 +29,7 @@ typedef struct {
  float       _aabb_margin;
  uint32_t    _leaf_size;
  uint8_t     _frame_tolerance;
+ bool        _checked;
 } oxb_bvh2d;
 
 
@@ -41,6 +42,7 @@ void oxb_bvh2d_traversepairs(oxb_bvh2d *oxb_restrict const bvh, void (*func)(oxb
 void oxb_bvh2d_traversebody(oxb_bvh2d *oxb_restrict const bvh, void (*func)(oxb_handle, oxb_handle, void*), void *ptr, const oxb_pool_id id);
 void oxb_bvh2d_mediansplit(oxb_bvh2d *oxb_restrict const bvh, oxb_pool2d *oxb_restrict pool2d);
 bool oxb_bvh2d_shouldrebuild(oxb_bvh2d *oxb_restrict const bvh, const uint8_t frame_tolerance);
+oxb_handle oxb_bvh2d_querypoint(oxb_bvh2d *oxb_restrict const bvh, oxb_pool2d *oxb_restrict const pool2d, oxb_vec2 point);
 
 #endif
 

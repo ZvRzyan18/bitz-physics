@@ -14,7 +14,6 @@ typedef enum {
 } oxb_object_type2d;
 
 
-/* (shape_type >> 20) */
 typedef enum {
  OXB_SHAPE_BOX_2D =        0b00000000000000000000000000000000,
  OXB_SHAPE_CIRCLE_2D =     0b00000000000000000000000000000001,
@@ -23,6 +22,11 @@ typedef enum {
  OXB_SHAPE_COMPOUND_2D =   0b00000000000000000000000000000100,
  OXB_SHAPE_MASK_2D =       0b00000000000000000000000000111111,
 } oxb_shape_type2d;
+
+typedef enum {
+ OXB_JOINT_MOUSE_2D =      0b00000000000000000000000000000000,
+ OXB_JOINT_MASK_2D =       0b00000000000000000000000000111111,
+} oxb_joint_type2d;
 
 
 typedef enum {
@@ -47,15 +51,13 @@ typedef void (*oxb_core2d_wait)(void *fence);
 
 typedef struct {
  oxb_allocator _allocator;
- 
- oxb_core2d_enqueue _worker_enqueue;
- oxb_core2d_isfinished _fence_isfinished;
- oxb_core2d_wait    _fence_wait;
- uint8_t            _worker_count;
- 
+
  oxb_vec2 _gravity;
  uint8_t  _substeps;
 } oxb_world2d_info;
+
+
+
 
 typedef union {
  struct {
@@ -65,6 +67,9 @@ typedef union {
   float    _radius;
  } _circle;
 } oxb_shape2d;
+
+
+
 
 typedef struct {
  uint32_t    _flags;
@@ -111,18 +116,44 @@ typedef struct {
    float       _dynamic_friction;
   } _static_body;
 
+
+  struct {
+   oxb_vec2   _anchor;
+   oxb_vec2   _point;
+   oxb_handle _object;
+   float      _max_force;
+  } _mouse;
   
  } _type;
 } oxb_object2d_info;
 
+
+
+
+
 typedef struct {
- oxb_vec2    _position;
- oxb_complex _rotation;
- oxb_vec2    _velocity;
- float       _omega;
- bool        _sleeping;
- bool        _resting;
+ union {
+  struct {
+   oxb_vec2    _position;
+   oxb_complex _rotation;
+   oxb_vec2    _velocity;
+   float       _omega;
+   float       _inv_mass;
+   float       _inv_rotational_inertia;
+  } _dynamic;
+  
+  struct {
+   oxb_vec2   _anchor;
+   oxb_vec2   _point;
+   oxb_handle _object;
+   float      _max_force;
+  } _mouse;
+  
+  
+ } _type;
+ uint16_t    _flags;
 } oxb_object2d_data;
+
 
 
 #ifdef __cplusplus
@@ -134,6 +165,7 @@ extern "C" {
 oxb_world2d* oxb_world2d_create(const oxb_world2d_info *oxb_restrict const info);
 void oxb_world2d_destroy(oxb_world2d *oxb_restrict const world);
 oxb_pool2d* oxb_world2d_getpool2d(oxb_world2d *oxb_restrict const world);
+oxb_handle oxb_world2d_querypoint(oxb_world2d *oxb_restrict const world, oxb_vec2 point);
 void oxb_world2d_step(oxb_world2d *oxb_restrict const world, const float dt);
 
 

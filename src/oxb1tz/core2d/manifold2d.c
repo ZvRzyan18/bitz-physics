@@ -41,7 +41,7 @@ void oxb_manifold2d_combine(oxb_manifold2d *oxb_restrict const out, const oxb_ma
 }
 
 
-manifold_contact_func oxb_manifold2d_object_vs_object[2][2] =
+const manifold2d_contact_func oxb_manifold2d_object_vs_object[2][2] =
 {
  {oxb_manifold2d_box_vs_box, oxb_manifold2d_box_vs_circle}, 
  {oxb_manifold2d_circle_vs_box, oxb_manifold2d_circle_vs_circle}

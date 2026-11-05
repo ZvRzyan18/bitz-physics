@@ -1,5 +1,17 @@
 # version 0.1.1
 
+• expose dynamic's inv_mass and inv_rotational_inertia
+
+• add mouse joint
+
+• make generic set/get data
+
+• fix pool2d removal, and properly deallocate bvh node
+
+• point object2d query
+
+• optimize update 2d pipeline
+
 • improve simd via mask vector
 
 • optimize sleeping
