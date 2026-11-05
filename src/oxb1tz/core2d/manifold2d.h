@@ -45,9 +45,9 @@ typedef struct {
  uint8_t       _flags;
 } oxb_manifold2d;
 
-typedef bool (*manifold_contact_func)(oxb_manifold2d *oxb_restrict const out, const oxb_collider2d *oxb_restrict const a, const oxb_collider2d *oxb_restrict const b);
+typedef bool (*manifold2d_contact_func)(oxb_manifold2d *oxb_restrict const out, const oxb_collider2d *oxb_restrict const a, const oxb_collider2d *oxb_restrict const b);
 
-extern manifold_contact_func oxb_manifold2d_object_vs_object[2][2];
+extern const manifold2d_contact_func oxb_manifold2d_object_vs_object[2][2];
 
 void oxb_manifold2d_combine(oxb_manifold2d *oxb_restrict const out, const oxb_manifold2d *oxb_restrict const m);
 bool oxb_manifold2d_box_vs_box(oxb_manifold2d *oxb_restrict const out, const oxb_collider2d *oxb_restrict const a, const oxb_collider2d *oxb_restrict const b);

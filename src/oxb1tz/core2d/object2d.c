@@ -123,14 +123,14 @@ void oxb_dynamic2d_integrate(oxb_dynamic2d *oxb_restrict const body, void *w, co
 
 
  /* lock the position and rotation */
- static const oxb_mask3 poslock_mask = OXB_MASK3_INIT((uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSY_2D, (uint32_t)OXB_FLAG_LOCK_ROT_2D);
- static const oxb_mask3 zero_mask = OXB_MASK3_INIT(0, 0, 0);
- oxb_mask3 locks = oxb_mask3_splat((uint32_t)body->_flags);
- locks = oxb_mask3_equal(oxb_mask3_and(locks, poslock_mask), zero_mask);
- oxb_vec3 movement_tmp = OXB_VEC3_INIT(oxb_vec2_getx(velocity), oxb_vec2_gety(velocity), omega);
- movement_tmp = oxb_mask3_tovec3(oxb_mask3_and(oxb_mask3_fromvec3(movement_tmp), locks));
- velocity = oxb_vec3_low(movement_tmp);
- omega = oxb_vec3_getz(movement_tmp);
+ static const oxb_mask4 poslock_mask = OXB_MASK4_INIT((uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSY_2D, (uint32_t)OXB_FLAG_LOCK_ROT_2D, 0);
+ static const oxb_mask4 zero_mask = OXB_MASK4_INIT(0, 0, 0, 0);
+ oxb_mask4 locks = oxb_mask4_splat((uint32_t)body->_flags);
+ locks = oxb_mask4_equal(oxb_mask4_and(locks, poslock_mask), zero_mask);
+ oxb_vec4 movement_tmp = OXB_VEC4_INIT(oxb_vec2_getx(velocity), oxb_vec2_gety(velocity), omega, 0.0f);
+ movement_tmp = oxb_mask4_tovec4(oxb_mask4_and(oxb_mask4_fromvec4(movement_tmp), locks));
+ velocity = oxb_vec4_low(movement_tmp);
+ omega = oxb_vec4_getz(movement_tmp);
 
 
  float delta_omega = omega * dt;
@@ -281,14 +281,14 @@ void oxb_kinematic2d_integrate(oxb_kinematic2d *oxb_restrict const body, const f
 
 
  /* lock the position and rotation */
- static const oxb_mask3 poslock_mask = OXB_MASK3_INIT((uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSY_2D, (uint32_t)OXB_FLAG_LOCK_ROT_2D);
- static const oxb_mask3 zero_mask = OXB_MASK3_INIT(0, 0, 0);
- oxb_mask3 locks = oxb_mask3_splat((uint32_t)body->_flags);
- locks = oxb_mask3_equal(oxb_mask3_and(locks, poslock_mask), zero_mask);
- oxb_vec3 movement_tmp = OXB_VEC3_INIT(oxb_vec2_getx(velocity), oxb_vec2_gety(velocity), omega);
- movement_tmp = oxb_mask3_tovec3(oxb_mask3_and(oxb_mask3_fromvec3(movement_tmp), locks));
- velocity = oxb_vec3_low(movement_tmp);
- omega = oxb_vec3_getz(movement_tmp);
+ static const oxb_mask4 poslock_mask = OXB_MASK4_INIT((uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSY_2D, (uint32_t)OXB_FLAG_LOCK_ROT_2D, 0);
+ static const oxb_mask4 zero_mask = OXB_MASK4_INIT(0, 0, 0, 0);
+ oxb_mask4 locks = oxb_mask4_splat((uint32_t)body->_flags);
+ locks = oxb_mask4_equal(oxb_mask4_and(locks, poslock_mask), zero_mask);
+ oxb_vec4 movement_tmp = OXB_VEC4_INIT(oxb_vec2_getx(velocity), oxb_vec2_gety(velocity), omega, 0.0f);
+ movement_tmp = oxb_mask4_tovec4(oxb_mask4_and(oxb_mask4_fromvec4(movement_tmp), locks));
+ velocity = oxb_vec4_low(movement_tmp);
+ omega = oxb_vec4_getz(movement_tmp);
 
 
  float delta_omega = omega * dt;

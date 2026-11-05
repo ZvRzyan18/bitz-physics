@@ -1,4 +1,5 @@
 #include "oxb1tz/core2d/bvh2d.h"
+#include "oxb1tz/core2d/intersect2d.h"
 #include "oxb1tz/memory.h"
 #include "oxb1tz/math.h"
 
@@ -550,6 +551,36 @@ oxb_noinline static void traverse_single_body(oxb_bvh2d *const bvh, oxb_pool_id 
  traverse_single_body(bvh, b->_right, func, ptr, id, depth + 1, info);
 }
 
+/* point query */
+oxb_noinline static oxb_handle traverse_single_point(oxb_bvh2d *const bvh, oxb_pool_id t, oxb_pool2d *oxb_restrict const pool2d, oxb_vec2 p, uint32_t depth, oxb_bvh2d_traversalinfo *info) {
+ if(oxb_pool_id_isnull(t))
+  return OXB_HANDLE_NULL;
+  
+ oxb_bvh2d_node *a = (oxb_bvh2d_node*)oxb_pool_get(&bvh->_pool, t);
+ 
+ if(a->_aabb._min._arr[0] > oxb_vec2_getx(p) || a->_aabb._min._arr[1] > oxb_vec2_gety(p)
+  || a->_aabb._max._arr[0] < oxb_vec2_getx(p) || a->_aabb._max._arr[1] < oxb_vec2_gety(p))
+  return OXB_HANDLE_NULL;
+
+ if(is_leaf(*a)) {
+  info->_pair_test++;
+  oxb_collider2d collider;
+  oxb_pool2d_collider(pool2d, &collider, a->_body);
+  bool intersect = oxb_intersect2d_point_vs_object[collider._flags & OXB_SHAPE_MASK_2D](p, &collider);
+  if(intersect)
+   return a->_body;
+  return OXB_HANDLE_NULL;
+ }
+
+ info->_node_visits++;
+ info->_max_depth = info->_max_depth < depth ? depth : info->_max_depth;
+
+ oxb_handle h = traverse_single_point(bvh, a->_left, pool2d, p, depth + 1, info);
+ if(!oxb_handle_isequal(h, OXB_HANDLE_NULL))
+  return h;
+ return traverse_single_point(bvh, a->_right, pool2d, p, depth + 1, info);
+}
+
 
 oxb_noinline static void traverse_delete_non_leaf(oxb_bvh2d *const bvh, oxb_pool_id n) {
  if(oxb_pool_id_isnull(n)) {
@@ -840,6 +871,7 @@ void oxb_bvh2d_create(oxb_bvh2d *oxb_restrict const bvh, oxb_allocator *oxb_rest
  bvh->_aabb_margin = aabb_margin;
  bvh->_root = OXB_POOL_NULL_ID;
  bvh->_frame_tolerance = 0;
+ bvh->_checked = false;
  oxb_pool_create(&bvh->_pool, alloc, sizeof(oxb_bvh2d_node), pool_size);
  oxb_bump_create(&bvh->_bump, alloc, bump_size);
 }
@@ -904,20 +936,23 @@ void oxb_bvh2d_traversebody(oxb_bvh2d *oxb_restrict const bvh, void (*func)(oxb_
  oxb_bvh2d_traversalinfo tree_info;
  oxb_memory_set(&tree_info, 0, sizeof(oxb_bvh2d_traversalinfo));
  traverse_single_body(bvh, bvh->_root, func, ptr, id, 0, &tree_info);
-/*
- float tolerance_factor = 2.5f;
- float log_n = oxb_log2((float)bvh->_leaf_size);
- uint32_t max_depth = oxb_round(tolerance_factor * log_n);
  
- int ca = tree_info._max_depth > max_depth;
- int cb = tree_info._node_visits > (bvh->_leaf_size * 20u);
- int cc = tree_info._pair_test > (bvh->_leaf_size * 40u);
+ /* this makes it once per frame */
+ if(!bvh->_checked) {
+  float tolerance_factor = 2.5f;
+  float log_n = oxb_log2((float)bvh->_leaf_size);
+  uint32_t max_depth = oxb_round(tolerance_factor * log_n);
+ 
+  int ca = tree_info._max_depth > max_depth;
+  int cb = tree_info._node_visits > (bvh->_leaf_size * 20u);
+  int cc = tree_info._pair_test > (bvh->_leaf_size * 40u);
 
- if(ca && cb && cc)
-  bvh->_frame_tolerance++;
- else
-  bvh->_frame_tolerance = 0;
- */
+  if(ca && cb && cc)
+   bvh->_frame_tolerance++;
+  else
+   bvh->_frame_tolerance = 0;
+  bvh->_checked = true;
+ }
 }
 
 
@@ -966,8 +1001,31 @@ void oxb_bvh2d_mediansplit(oxb_bvh2d *oxb_restrict const bvh, oxb_pool2d *oxb_re
 
 
 bool oxb_bvh2d_shouldrebuild(oxb_bvh2d *oxb_restrict const bvh, const uint8_t frame_tolerance) {
+ bvh->_checked = false;
  return bvh->_frame_tolerance >= frame_tolerance;
 }
 
+oxb_handle oxb_bvh2d_querypoint(oxb_bvh2d *oxb_restrict const bvh, oxb_pool2d *oxb_restrict const pool2d, oxb_vec2 point) {
+ oxb_bvh2d_traversalinfo tree_info;
+ oxb_memory_set(&tree_info, 0, sizeof(oxb_bvh2d_traversalinfo));
+ oxb_handle h = traverse_single_point(bvh, bvh->_root, pool2d, point, 0, &tree_info);
+ 
+ /* this makes it once per frame */
+ if(!bvh->_checked) {
+  float tolerance_factor = 2.5f;
+  float log_n = oxb_log2((float)bvh->_leaf_size);
+  uint32_t max_depth = oxb_round(tolerance_factor * log_n);
+ 
+  int ca = tree_info._max_depth > max_depth;
+  int cb = tree_info._node_visits > (bvh->_leaf_size * 20u);
+  int cc = tree_info._pair_test > (bvh->_leaf_size * 40u);
 
+  if(ca && cb && cc)
+   bvh->_frame_tolerance++;
+  else
+   bvh->_frame_tolerance = 0;
+  bvh->_checked = true;
+ }
+ return h;
+}
 
