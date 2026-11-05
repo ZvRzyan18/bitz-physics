@@ -12,6 +12,11 @@ NOTE : This engine is still currently unstable.
 
 • Circle
 
+**Joint 2D **
+
+• Mouse Joint
+
+
 # version 0.1.1
  see [update_log.txt](https://github.com/ZvRzyan18/bitz-physics/blob/main/update_log.txt)
 
