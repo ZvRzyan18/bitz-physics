@@ -1,3 +1,11 @@
+# version 0.1.2
+
+• add omega clamping
+
+• fix object2d removal, also linear search through manifold to remove stale ids
+
+• fix incorrect assert
+
 # version 0.1.1
 
 • expose dynamic's inv_mass and inv_rotational_inertia
