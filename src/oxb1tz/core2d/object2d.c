@@ -120,7 +120,7 @@ void oxb_dynamic2d_integrate(oxb_dynamic2d *oxb_restrict const body, void *w, co
  
  velocity = oxb_vec2_mul(velocity, linear_damping);
  omega *= angular_damping;
-
+ omega = oxb_max(oxb_min(omega, 2.6f), -2.6f);
 
  /* lock the position and rotation */
  static const oxb_mask4 poslock_mask = OXB_MASK4_INIT((uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSY_2D, (uint32_t)OXB_FLAG_LOCK_ROT_2D, 0);
@@ -278,6 +278,7 @@ void oxb_kinematic2d_integrate(oxb_kinematic2d *oxb_restrict const body, const f
   
  velocity = oxb_vec2_mul(velocity, linear_damping);
  omega *= angular_damping;
+ omega = oxb_max(oxb_min(omega, 2.6f), -2.6f);
 
 
  /* lock the position and rotation */
