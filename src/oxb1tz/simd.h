@@ -150,7 +150,7 @@ oxb_inline void oxb_integrate2d_dynamic4(oxb_dynamic2d_batch4 *batch, oxb_vec2 g
  batch->_velocity_x = oxb_vec4_mul(batch->_velocity_x, linear_damp);
  batch->_velocity_y = oxb_vec4_mul(batch->_velocity_y, linear_damp);
  batch->_omega = oxb_vec4_mul(batch->_omega, oxb_vec4_exp2(oxb_vec4_mul(batch->_angular_damping, dt_vec)));
-
+ batch->_omega = oxb_vec4_max(oxb_vec4_min(batch->_omega, oxb_vec4_splat(2.6f)), oxb_vec4_splat(-2.6f));
 
  /* lock mask */
  static const oxb_mask4 posx_lock = OXB_MASK4_INIT((uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSX_2D);
