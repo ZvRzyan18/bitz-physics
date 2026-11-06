@@ -17,7 +17,7 @@ NOTE : This engine is still currently unstable.
 • Mouse Joint
 
 
-# version 0.1.1
+# version 0.1.2
  see [update_log.txt](https://github.com/ZvRzyan18/bitz-physics/blob/main/update_log.txt)
 
 
