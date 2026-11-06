@@ -38,7 +38,10 @@ oxb_noinline static void broadphase_query(oxb_handle ha, oxb_handle hb, void *w)
   if((obj_a->_flags & OXB_FLAG_SLEEP_2D) && (obj_b->_flags & OXB_FLAG_SLEEP_2D) && !reset_frame && node != NULL) {
    oxb_pool_id a_island_id = oxb_island2d_find(&world->_island, obj_a->_island_id);
    oxb_pool_id b_island_id = oxb_island2d_find(&world->_island, obj_b->_island_id);
-   if(oxb_pool_id_isequal(a_island_id, b_island_id) && oxb_island2d_sleeping(&world->_island, a_island_id)) {
+  
+   bool is_equal_island = oxb_pool_id_isequal(a_island_id, b_island_id);
+
+   if(is_equal_island && oxb_island2d_sleeping(&world->_island, a_island_id)) {
     node->_manifold._flags |= OXB_MANIFOLD2D_QUERIED;
     oxb_solver2d_contact_prepare(&node->_manifold, &world->_pool2d, &world->_input);
     return;
@@ -138,10 +141,12 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
    if(node->_manifold._a._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
     oxb_dynamic2d *obj = oxb_pool2d_get(&world->_pool2d, node->_manifold._a);
     obj->_flags &= ~OXB_FLAG_REST_2D;
+    obj->_flags &= ~OXB_FLAG_SLEEP_2D;
    }
    if(node->_manifold._b._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
     oxb_dynamic2d *obj = oxb_pool2d_get(&world->_pool2d, node->_manifold._b);
     obj->_flags &= ~OXB_FLAG_REST_2D;
+    obj->_flags &= ~OXB_FLAG_SLEEP_2D;
    }
    oxb_contacthash2d_remove(&world->_contacts, node);
   }

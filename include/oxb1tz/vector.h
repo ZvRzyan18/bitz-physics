@@ -944,6 +944,33 @@ oxb_inline oxb_vec4 oxb_vec4_abs(const oxb_vec4 a) {
 #endif
 }
 
+oxb_inline oxb_vec4 oxb_vec4_min(const oxb_vec4 a, const oxb_vec4 b) {
+#ifdef OXB_NEON
+ return vminq_f32(a, b);
+#else
+ oxb_vec4 out;
+ out._arr[0] = oxb_min(oxb_vec4_getx(a), oxb_vec4_getx(b));
+ out._arr[1] = oxb_min(oxb_vec4_gety(a), oxb_vec4_gety(b));
+ out._arr[2] = oxb_min(oxb_vec4_getz(a), oxb_vec4_getz(b));
+ out._arr[3] = oxb_min(oxb_vec4_getw(a), oxb_vec4_getw(b));
+ return out;
+#endif
+}
+
+oxb_inline oxb_vec4 oxb_vec4_max(const oxb_vec4 a, const oxb_vec4 b) {
+#ifdef OXB_NEON
+ return vmaxq_f32(a, b);
+#else
+ oxb_vec4 out;
+ out._arr[0] = oxb_max(oxb_vec4_getx(a), oxb_vec4_getx(b));
+ out._arr[1] = oxb_max(oxb_vec4_gety(a), oxb_vec4_gety(b));
+ out._arr[2] = oxb_max(oxb_vec4_getz(a), oxb_vec4_getz(b));
+ out._arr[3] = oxb_max(oxb_vec4_getw(a), oxb_vec4_getw(b));
+ return out;
+#endif
+}
+
+
 oxb_inline oxb_vec4 oxb_vec4_add(const oxb_vec4 a, const oxb_vec4 b) {
 #ifdef OXB_NEON
  return vaddq_f32(a, b);

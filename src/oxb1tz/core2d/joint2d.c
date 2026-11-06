@@ -59,7 +59,6 @@ static void oxb_mouse2d_presolve(oxb_joint2d *oxb_restrict const joint, const ox
 	velocity = oxb_vec2_add(velocity, oxb_vec2_mul(oxb_vec2_splat(inv_mass), accumulated_lambda));
 	omega += inv_inertia * oxb_vec2_cross(r, accumulated_lambda);
 
-//OXB_FLAG_REST_2D
 
  oxb_vec2_store(joint->_type._mouse._global_anchor._arr, r);
 
@@ -71,6 +70,7 @@ static void oxb_mouse2d_presolve(oxb_joint2d *oxb_restrict const joint, const ox
    oxb_vec2_store(body->_velocity._arr, velocity);
    body->_omega = omega;
 
+   /* force wake up if it is moving fast enough */
    const float vt = 1.2f;
    const float vo = 0.4f;
 

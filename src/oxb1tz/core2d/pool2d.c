@@ -78,7 +78,7 @@ oxb_handle oxb_pool2d_acquire(oxb_pool2d *oxb_restrict const pool, const oxb_obj
 
 
 void oxb_pool2d_release(oxb_pool2d *oxb_restrict const pool, const oxb_handle id) {
- assert(id._id < 5);
+ assert(id._type < 5);
  oxb_container_id container_id;
  container_id._val = id._id;
 
@@ -90,18 +90,79 @@ void oxb_pool2d_release(oxb_pool2d *oxb_restrict const pool, const oxb_handle id
   {
   	oxb_dynamic2d *dynamic_body = (oxb_dynamic2d*)oxb_container_get(&pool->_containers[OXB_POOL2D_TYPE_DYNAMIC_2D], container_id);
   	oxb_bvh2d_remove(bvh, dynamic_body->_bvh_id);
+
+   /* force wake up, and remove manifold with stale id */
+   for(size_t i = 0; i < world->_contacts._pool._size;) {
+   	oxb_contacthash2d_node *node = ((oxb_contacthash2d_node*)world->_contacts._pool._bytes) + i;
+    if(oxb_handle_isequal(node->_manifold._a, id) || oxb_handle_isequal(node->_manifold._b, id)) {
+    if(node->_manifold._a._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
+     oxb_dynamic2d *obj = oxb_pool2d_get(&world->_pool2d, node->_manifold._a);
+     obj->_flags &= ~OXB_FLAG_REST_2D;
+     obj->_flags &= ~OXB_FLAG_SLEEP_2D;
+    }
+    if(node->_manifold._b._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
+     oxb_dynamic2d *obj = oxb_pool2d_get(&world->_pool2d, node->_manifold._b);
+     obj->_flags &= ~OXB_FLAG_REST_2D;
+     obj->_flags &= ~OXB_FLAG_SLEEP_2D;
+    }
+     oxb_contacthash2d_remove(&world->_contacts, node);
+    } else
+    i++;
+  }
+ 
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
   {
   	oxb_kinematic2d *kinematic_body = (oxb_kinematic2d*)oxb_container_get(&pool->_containers[OXB_POOL2D_TYPE_KINEMATIC_2D], container_id);
   	oxb_bvh2d_remove(bvh, kinematic_body->_bvh_id);
+
+   /* force wake up, and remove manifold with stale id */
+   for(size_t i = 0; i < world->_contacts._pool._size;) {
+   	oxb_contacthash2d_node *node = ((oxb_contacthash2d_node*)world->_contacts._pool._bytes) + i;
+    if(oxb_handle_isequal(node->_manifold._a, id) || oxb_handle_isequal(node->_manifold._b, id)) {
+    if(node->_manifold._a._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
+     oxb_dynamic2d *obj = oxb_pool2d_get(&world->_pool2d, node->_manifold._a);
+     obj->_flags &= ~OXB_FLAG_REST_2D;
+     obj->_flags &= ~OXB_FLAG_SLEEP_2D;
+    }
+    if(node->_manifold._b._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
+     oxb_dynamic2d *obj = oxb_pool2d_get(&world->_pool2d, node->_manifold._b);
+     obj->_flags &= ~OXB_FLAG_REST_2D;
+     obj->_flags &= ~OXB_FLAG_SLEEP_2D;
+    }
+     oxb_contacthash2d_remove(&world->_contacts, node);
+    } else
+    i++;
+   }
+  
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
   {
   	oxb_static2d *static_body = (oxb_static2d*)oxb_container_get(&pool->_containers[OXB_POOL2D_TYPE_STATIC_2D], container_id);
   	oxb_bvh2d_remove(bvh, static_body->_bvh_id);
+
+   /* force wake up, and remove manifold with stale id */
+   for(size_t i = 0; i < world->_contacts._pool._size;) {
+   	oxb_contacthash2d_node *node = ((oxb_contacthash2d_node*)world->_contacts._pool._bytes) + i;
+    if(oxb_handle_isequal(node->_manifold._a, id) || oxb_handle_isequal(node->_manifold._b, id)) {
+    if(node->_manifold._a._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
+     oxb_dynamic2d *obj = oxb_pool2d_get(&world->_pool2d, node->_manifold._a);
+     obj->_flags &= ~OXB_FLAG_REST_2D;
+     obj->_flags &= ~OXB_FLAG_SLEEP_2D;
+    }
+    if(node->_manifold._b._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
+     oxb_dynamic2d *obj = oxb_pool2d_get(&world->_pool2d, node->_manifold._b);
+     obj->_flags &= ~OXB_FLAG_REST_2D;
+     obj->_flags &= ~OXB_FLAG_SLEEP_2D;
+    }
+     oxb_contacthash2d_remove(&world->_contacts, node);
+    } else
+    i++;
+   }
+ 
+ 
   }
   break;
   case OXB_POOL2D_TYPE_JOINT_2D:
