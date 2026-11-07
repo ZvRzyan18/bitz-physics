@@ -17,9 +17,6 @@ typedef enum {
 typedef enum {
  OXB_SHAPE_BOX_2D =        0b00000000000000000000000000000000,
  OXB_SHAPE_CIRCLE_2D =     0b00000000000000000000000000000001,
- OXB_SHAPE_CAPSULE_2D =    0b00000000000000000000000000000010,
- OXB_SHAPE_CONVEX_2D =     0b00000000000000000000000000000011,
- OXB_SHAPE_COMPOUND_2D =   0b00000000000000000000000000000100,
  OXB_SHAPE_MASK_2D =       0b00000000000000000000000000111111,
 } oxb_shape_type2d;
 
@@ -42,6 +39,7 @@ typedef enum {
 
 typedef struct oxb_world2d oxb_world2d;
 typedef struct oxb_pool2d oxb_pool2d;
+
 
 typedef void (*oxb_core2d_process)(void *ctx);
 typedef void* (*oxb_core2d_enqueue)(oxb_core2d_process p, void *ctx, uint8_t id);
@@ -141,6 +139,18 @@ typedef struct {
    float       _inv_mass;
    float       _inv_rotational_inertia;
   } _dynamic;
+
+  struct {
+   oxb_vec2    _position;
+   oxb_complex _rotation;
+   oxb_vec2    _velocity;
+   float       _omega;
+  } _kinematic;
+
+  struct {
+   oxb_vec2    _position;
+   oxb_complex _rotation;
+  } _static;
   
   struct {
    oxb_vec2   _anchor;
