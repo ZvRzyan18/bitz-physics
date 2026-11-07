@@ -1,5 +1,11 @@
 # version 0.1.2
 
+• improve get/set pool2d api
+
+• change the sqrt magic number into more optimzied value
+
+• improve mouse joint2d stability through velocity target and hyperbolic tangent transition
+
 • add omega clamping
 
 • fix object2d removal, also linear search through manifold to remove stale ids
