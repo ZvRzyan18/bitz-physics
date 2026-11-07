@@ -218,16 +218,21 @@ oxb_inline float oxb_sqrt(const float x) {
 
 /*
  Quake III fast inv sqrt
+
+ magic number total mean error input [1, 100]
+ <MAE>       <magic>
+ 0.00421 --> 0x5f3759df (original magic number)
+ 0.00428 --> 0x5F378171 (some random guess)
+ 0.00324 --> 0x5f33cea4 (linear search optimized coeffs ≈23.1% free accuracy increase)
 */
 oxb_inline float oxb_rsqrt(const float x) {
  float f, mx, x_half;
  oxb_floatbits bits, x_bits;
  x_bits.f = x;
- bits.i =   0x5F378171 - (x_bits.i >> 1);
+ bits.i =   0x5f33cea4 - (x_bits.i >> 1);
  mx =       bits.f;
  x_half =   x * 0.5f;
  f =        mx;
- f =        (f * (1.5f - (x_half * f * f)));
  f =        (f * (1.5f - (x_half * f * f)));
  return f;
 }
@@ -237,11 +242,10 @@ oxb_inline float oxb_sqrt(const float x) {
  float f, mx, x_half;
  oxb_floatbits bits, x_bits;
  x_bits.f = x;
- bits.i =   0x5F378171 - (x_bits.i >> 1);
+ bits.i =   0x5f33cea4 - (x_bits.i >> 1);
  mx =       bits.f;
  x_half =   x * 0.5f;
  f =        mx;
- f =        (f * (1.5f - (x_half * f * f)));
  f =        (f * (1.5f - (x_half * f * f)));
  return x * f;
 }

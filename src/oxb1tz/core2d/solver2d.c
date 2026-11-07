@@ -165,7 +165,7 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
  }
 
  float inv_mass = a_inv_mass + b_inv_mass;
- float e = oxb_max(a_restitution, b_restitution);
+ float e = oxb_min(a_restitution, b_restitution);
 
  
  for(uint8_t i = 0; i < m->_contact_count; i++) {

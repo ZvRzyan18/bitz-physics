@@ -196,31 +196,25 @@ void oxb_pool2d_getdata(oxb_pool2d *oxb_restrict const pool, oxb_object2d_data *
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
   {
-/*
   	oxb_container_id lookup;
   	lookup._val = id._id;
   	oxb_kinematic2d *body = (oxb_kinematic2d*)oxb_container_get(&pool->_containers[OXB_POOL2D_TYPE_KINEMATIC_2D], lookup);
   	
-  	dat->_position = oxb_vec2_load(body->_position._arr);
-  	dat->_rotation = oxb_vec2_load(body->_rotation._arr);
-  	dat->_velocity = oxb_vec2_load(body->_velocity._arr);
-  	dat->_omega = body->_omega;
+  	dat->_type._kinematic._position = oxb_vec2_load(body->_position._arr);
+  	dat->_type._kinematic._rotation = oxb_vec2_load(body->_rotation._arr);
+  	dat->_type._kinematic._velocity = oxb_vec2_load(body->_velocity._arr);
+  	dat->_type._kinematic._omega = body->_omega;
   	dat->_flags = body->_flags & OXB_FLAG_MASK_2D;
-*/
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
   {
-/*
   	oxb_container_id lookup;
   	lookup._val = id._id;
   	oxb_static2d *body = (oxb_static2d*)oxb_container_get(&pool->_containers[OXB_POOL2D_TYPE_STATIC_2D], lookup);
   	
-  	dat->_position = oxb_vec2_load(body->_position._arr);
-  	dat->_rotation = oxb_vec2_load(body->_rotation._arr);
-  	dat->_velocity = oxb_vec2_splat(0.0f);
-  	dat->_omega = 0.0f;
-*/
+  	dat->_type._static._position = oxb_vec2_load(body->_position._arr);
+  	dat->_type._static._rotation = oxb_vec2_load(body->_rotation._arr);
   }
   break;
   case OXB_POOL2D_TYPE_JOINT_2D:
@@ -266,31 +260,28 @@ void oxb_pool2d_setdata(oxb_pool2d *oxb_restrict const pool, const oxb_handle id
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
   {
-/*
   	oxb_container_id lookup;
   	lookup._val = id._id;
   	oxb_kinematic2d *body = (oxb_kinematic2d*)oxb_container_get(&pool->_containers[OXB_POOL2D_TYPE_KINEMATIC_2D], lookup);
   	
-  	oxb_vec2_store(body->_position._arr, dat->_position);
-  	oxb_vec2_store(body->_rotation._arr, dat->_rotation);
-  	oxb_vec2_store(body->_velocity._arr, dat->_velocity);
-  	body->_omega = dat->_omega;
+  	oxb_vec2_store(body->_position._arr, dat->_type._kinematic._position);
+  	oxb_vec2_store(body->_rotation._arr, dat->_type._kinematic._rotation);
+  	oxb_vec2_store(body->_velocity._arr, dat->_type._kinematic._velocity);
+   body->_omega = dat->_type._kinematic._omega;
 
   	body->_flags &= ~OXB_FLAG_MASK_2D;
   	body->_flags |= dat->_flags & OXB_FLAG_MASK_2D;
-*/
+
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
   {
-/*
   	oxb_container_id lookup;
   	lookup._val = id._id;
   	oxb_static2d *body = (oxb_static2d*)oxb_container_get(&pool->_containers[OXB_POOL2D_TYPE_STATIC_2D], lookup);
   	
-  	oxb_vec2_store(body->_position._arr, dat->_position);
-  	oxb_vec2_store(body->_rotation._arr, dat->_rotation);
-*/
+  	oxb_vec2_store(body->_position._arr, dat->_type._static._position);
+  	oxb_vec2_store(body->_rotation._arr, dat->_type._static._rotation);
   }
   break;
   case OXB_POOL2D_TYPE_JOINT_2D:
@@ -315,6 +306,7 @@ void oxb_pool2d_setdata(oxb_pool2d *oxb_restrict const pool, const oxb_handle id
 }
 
 
+
 void oxb_pool2d_addforce(oxb_pool2d *oxb_restrict const pool, const oxb_handle id, const oxb_vec2 v) {
  oxb_world2d *world = (oxb_world2d*)pool->_world;
 
@@ -331,14 +323,6 @@ void oxb_pool2d_addforce(oxb_pool2d *oxb_restrict const pool, const oxb_handle i
    velocity = oxb_vec2_fma(acceleration, oxb_vec2_splat(world->_input._dt), velocity);
    oxb_vec2_store(body->_velocity._arr, velocity);
   }
-  break;
-  case OXB_POOL2D_TYPE_KINEMATIC_2D:
-   assert(0);
-   oxb_unreachable();
-  break;
-  case OXB_POOL2D_TYPE_STATIC_2D:
-   assert(0);
-   oxb_unreachable();
   break;
   default:
    assert(0);
@@ -363,14 +347,6 @@ void oxb_pool2d_addtorque(oxb_pool2d *oxb_restrict const pool, const oxb_handle 
    omega = oxb_fma(acceleration, world->_input._dt, omega);
    body->_omega = omega;
   }
-  break;
-  case OXB_POOL2D_TYPE_KINEMATIC_2D:
-   assert(0);
-   oxb_unreachable();
-  break;
-  case OXB_POOL2D_TYPE_STATIC_2D:
-   assert(0);
-   oxb_unreachable();
   break;
   default:
    assert(0);

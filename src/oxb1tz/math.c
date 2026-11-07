@@ -346,11 +346,9 @@ static const float ATAN[2] = {
 
 oxb_pure float oxb_atan(const float x) {
  float x2, mx, out;
- uint8_t hi;
  
  mx = oxb_abs(x);
- hi = mx > 1.0f;
- if(!hi) {
+ if(mx < 1.0f) {
   x2 = mx * mx;
   out = oxb_fma((mx * x2), oxb_fma(ATAN[0], x2, ATAN[1]), mx);
   return oxb_copysign(mx, x);

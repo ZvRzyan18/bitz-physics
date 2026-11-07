@@ -12,9 +12,9 @@ typedef struct {
   struct {
    float         _inv_mass[4];
    oxb_packedv2f _point;
+   oxb_packedv2f _previous_point;
    oxb_packedv2f _anchor;
    oxb_packedv2f _global_anchor;
-   oxb_packedv2f _rotate;
    oxb_packedv2f _accumulated_lambda;
    float         _max_force;
    oxb_handle _object;
