@@ -82,12 +82,6 @@ void oxb_dynamic2d_init(oxb_dynamic2d *oxb_restrict const body, const oxb_object
    body->_inv_rotational_inertia = 1.0f / inertia;
   }
   break;
-  case OXB_SHAPE_CAPSULE_2D:
-  break;
-  case OXB_SHAPE_CONVEX_2D:
-  break;
-  case OXB_SHAPE_COMPOUND_2D:
-  break;
   default :
    assert(0);
    oxb_unreachable();
@@ -248,13 +242,7 @@ void oxb_kinematic2d_init(oxb_kinematic2d *oxb_restrict const body, const oxb_ob
    body->_shape._circle._radius = info->_type._dynamic_body._shape._circle._radius;
   }
   break;
-  case OXB_SHAPE_CAPSULE_2D:
-  break;
-  case OXB_SHAPE_CONVEX_2D:
-  break;
-  case OXB_SHAPE_COMPOUND_2D:
-  break;
-  default :
+  default:
    assert(0);
    oxb_unreachable();
  }
@@ -350,12 +338,6 @@ void oxb_static2d_init(oxb_static2d *oxb_restrict const body, const oxb_object2d
   {
    body->_shape._circle._radius = info->_type._dynamic_body._shape._circle._radius;
   }
-  break;
-  case OXB_SHAPE_CAPSULE_2D:
-  break;
-  case OXB_SHAPE_CONVEX_2D:
-  break;
-  case OXB_SHAPE_COMPOUND_2D:
   break;
   default:
    assert(0);
