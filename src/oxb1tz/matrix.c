@@ -1,6 +1,7 @@
 #include "oxb1tz/matrix.h"
 #include "oxb1tz/vector.h"
 #include "oxb1tz/complex.h"
+#include "oxb1tz/mask.h"
 
 
 const oxb_mat2x2 oxb_mat2x2_identity = {
@@ -67,10 +68,12 @@ oxb_hot oxb_mat2x2 oxb_mat2x2_inv(const oxb_mat2x2 a) {
  /* vec2 cross product : a.x * b.y - a.y * b.x */
  float det = oxb_vec2_cross(a._basis[0], a._basis[1]);
  oxb_vec4 inv_det = oxb_vec4_splat(1.0f / det);
- oxb_vec4 sign = OXB_VEC4_INIT(1.0f, -1.0f, -1.0f, 1.0f);
+ 
+ static const oxb_mask4 sign = OXB_MASK4_INIT(0x00000000, 0x80000000, 0x80000000, 0x00000000);
  
  oxb_vec4 combined = oxb_vec4_combine(a._basis[0], a._basis[1]);
- combined = oxb_vec4_mul(oxb_vec4_mul(sign, combined), inv_det);
+ combined = oxb_vec4_mul(combined, inv_det);
+ combined = oxb_mask4_tovec4(oxb_mask4_eor(oxb_mask4_fromvec4(combined), sign));
  combined = oxb_vec4_perm(combined, 3, 1, 2, 0);
  
  oxb_mat2x2 out;

@@ -1,4 +1,5 @@
 #include "oxb1tz/core2d/intersect2d.h"
+#include "oxb1tz/mask.h"
 
 const intersect2d_point_func oxb_intersect2d_point_vs_object[2] = {
  oxb_intersect2d_point_vs_box,
@@ -19,7 +20,7 @@ bool oxb_intersect2d_point_vs_box(oxb_vec2 a, const oxb_collider2d *oxb_restrict
 
  oxb_vec2 local = oxb_complex_mul(relative, oxb_complex_conj(b_rotation));
  local = oxb_vec2_abs(local);
- return oxb_vec2_getx(local) <= oxb_vec2_getx(b_half_size) && oxb_vec2_gety(local) <= oxb_vec2_gety(b_half_size);
+ return oxb_mask2_all(oxb_mask2_flte(local, b_half_size));
 }
 
 

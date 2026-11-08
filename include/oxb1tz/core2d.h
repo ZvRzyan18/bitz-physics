@@ -48,8 +48,16 @@ typedef void (*oxb_core2d_wait)(void *fence);
 
 
 typedef struct {
+ 
+ struct {
+  size_t _dynamic_reserve;
+  size_t _kinematic_reserve;
+  size_t _static_reserve;
+  size_t _sensor_reserve;
+  size_t _joint_reserve;
+ } _pool2d;
+ 
  oxb_allocator _allocator;
-
  oxb_vec2 _gravity;
  uint8_t  _substeps;
 } oxb_world2d_info;

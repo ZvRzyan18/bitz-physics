@@ -1,5 +1,7 @@
 # version 0.1.2
 
+• improve mask simd
+
 • improve get/set pool2d api
 
 • change the sqrt magic number into more optimzied value
