@@ -26,7 +26,7 @@ struct oxb_pool2d {
  void *_world;
 };
 
-void oxb_pool2d_create(oxb_pool2d *oxb_restrict const pool, oxb_allocator *oxb_restrict const alloc, const size_t initial_reserve);
+void oxb_pool2d_create(oxb_pool2d *oxb_restrict const pool, oxb_allocator *oxb_restrict const alloc, const size_t initial_reserves[5]);
 void oxb_pool2d_destroy(oxb_pool2d *oxb_restrict const pool);
 
 oxb_handle oxb_pool2d_acquire(oxb_pool2d *oxb_restrict const pool, const oxb_object2d_info *oxb_restrict const info);

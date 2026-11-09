@@ -1,7 +1,6 @@
 #include "oxb1tz/core2d/joint2d.h"
 #include "oxb1tz/core2d/world2d.h"
 #include "oxb1tz/core2d/solver2d.h"
-#include "oxb1tz/core2d/island2d.h"
 #include "oxb1tz/memory.h"
 #include "oxb1tz/matrix.h"
 
@@ -99,18 +98,7 @@ oxb_hot static void oxb_mouse2d_presolve(oxb_joint2d *oxb_restrict const joint, 
    body->_omega = omega;
 
    /* force wake up if it is moving fast enough */
-   const float vt = 1.2f;
-   const float vo = 0.4f;
-
-   if(oxb_vec2_dot(velocity, velocity) > vt || oxb_abs(omega) > vo) {
-    body->_resting_time = 0.0f;
-    body->_flags &= ~OXB_FLAG_REST_2D;
-    body->_flags &= ~OXB_FLAG_SLEEP_2D;
-    
-    oxb_container_id group_id = oxb_island2d_groupid(&world->_island, body->_island_id);
-    oxb_island2d_group *group = oxb_container_get(&world->_island._group_container, group_id);
-    group->_sleeping = false;
-   }
+   oxb_dynamic2d_wake(body, world);
   }
   break;
   default:
@@ -192,11 +180,8 @@ oxb_hot static void oxb_mouse2d_solve(oxb_joint2d *oxb_restrict const joint, con
  float len_squared = oxb_vec2_dot(accumulated_lambda, accumulated_lambda);
 
  if(len_squared > 1e-3f) {
-  /* create smooth transition without hard clamp */
-  float len = oxb_sqrt(len_squared);
-  float ratio = len / max_impulse;
-  float scale = max_impulse * oxb_tanh(ratio) / len;
-  accumulated_lambda = oxb_vec2_mul(accumulated_lambda, oxb_vec2_splat(scale));
+  float inv_len = oxb_rsqrt(len_squared);
+  accumulated_lambda = oxb_vec2_mul(accumulated_lambda, oxb_vec2_splat(max_impulse * inv_len));
  }
  
 
