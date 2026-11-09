@@ -229,7 +229,7 @@ oxb_inline void VECTOR2_TEST() {
   tmp[1] = VECTOR_TEST_RANDOM(min_range, max_range);
   oxb_vec2 ma = oxb_vec2_load(tmp);
   oxb_vec2 r = oxb_vec2_normalize(ma);
-  float length = sqrtf(oxb_vec2_dot(r, r));
+  float length = oxb_vec2_dot(r, r);
   assert(fabsf(length - 1.0f) < epsilon);
  }
 
@@ -554,7 +554,7 @@ oxb_inline void VECTOR3_TEST() {
   tmp[2] = VECTOR_TEST_RANDOM(min_range, max_range);
   oxb_vec3 ma = oxb_vec3_load(tmp);
   oxb_vec3 r = oxb_vec3_normalize(ma);
-  float length = sqrtf(oxb_vec3_dot(r, r));
+  float length = oxb_vec3_dot(r, r);
   assert(fabsf(length - 1.0f) < epsilon);
  }
 
@@ -880,7 +880,7 @@ void VECTOR4_TEST() {
   tmp[3] = VECTOR_TEST_RANDOM(min_range, max_range);
   oxb_vec4 ma = oxb_vec4_load(tmp);
   oxb_vec4 r = oxb_vec4_normalize(ma);
-  float length = sqrtf(oxb_vec4_dot(r, r));
+  float length = oxb_vec4_dot(r, r);
   assert(fabsf(length - 1.0f) < epsilon);
  }
  
