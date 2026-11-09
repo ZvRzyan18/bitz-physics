@@ -1,5 +1,15 @@
 # version 0.1.2
 
+• remove sqrt when checking normalized length squared
+
+• use arm64 native inverse sqrt
+
+• expose more configurable when creating world2d
+
+• move hash function to math.h
+
+• expose configurable pool2d reserves
+
 • improve mask simd
 
 • improve get/set pool2d api
