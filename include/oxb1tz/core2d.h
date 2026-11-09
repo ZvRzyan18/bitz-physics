@@ -57,8 +57,21 @@ typedef struct {
   size_t _joint_reserve;
  } _pool2d;
  
+ struct {
+  size_t _node_reserve;
+  size_t _bump_reserve;
+  float  _fat_margin;
+ } _bvh2d;
+ 
+ struct {
+  size_t _buckets_reserve;
+ } _contacthash2d;
+ 
  oxb_allocator _allocator;
  oxb_vec2 _gravity;
+ float    _linear_rest_threshold;
+ float    _angular_rest_threshold;
+ float    _rest_time_threshold;
  uint8_t  _substeps;
 } oxb_world2d_info;
 

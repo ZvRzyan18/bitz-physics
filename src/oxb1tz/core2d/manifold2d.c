@@ -1,4 +1,5 @@
 #include "oxb1tz/core2d/manifold2d.h"
+#include "oxb1tz/core2d/pool2d.h"
 #include "oxb1tz/matrix.h"
 
 static_assert(sizeof(oxb_contact2d_id) == 2, "not 2 bytes");
@@ -271,10 +272,12 @@ bool oxb_manifold2d_box_vs_box(oxb_manifold2d *oxb_restrict const out, const oxb
    index_b = i;
   }
  }
- 
+
  /* sensor collision, no need manifold creation. */
- if(a->_allocation._type == 3 || b->_allocation._type == 3)
+ if(a->_allocation._type == OXB_POOL2D_TYPE_SENSOR_2D || b->_allocation._type == OXB_POOL2D_TYPE_SENSOR_2D) {
+  out->_flags |= OXB_MANIFOLD2D_SENSOR;
   return true;
+ }
  
  /* manifold generation */
  uint8_t ref_index, inc_index;
@@ -428,11 +431,12 @@ bool oxb_manifold2d_box_vs_circle(oxb_manifold2d *oxb_restrict const out, const 
  float radius_squared = radius * radius;
  if(dist_squared > radius_squared)
   return false;
-
  /* sensor collision, no need manifold creation. */
- if(a->_allocation._type == 3 || b->_allocation._type == 3)
+ if(a->_allocation._type == OXB_POOL2D_TYPE_SENSOR_2D || b->_allocation._type == OXB_POOL2D_TYPE_SENSOR_2D) {
+  out->_flags |= OXB_MANIFOLD2D_SENSOR;
   return true;
-
+ }
+ 
  /* manifold generation */
  oxb_vec2 edge[2];
  oxb_vec2 extent_a = oxb_vec2_add(half_size, local);
@@ -571,9 +575,11 @@ bool oxb_manifold2d_circle_vs_circle(oxb_manifold2d *oxb_restrict const out, con
   return false;
 
  /* sensor collision, no need manifold creation. */
- if(a->_allocation._type == 3 || b->_allocation._type == 3)
+ if(a->_allocation._type == OXB_POOL2D_TYPE_SENSOR_2D || b->_allocation._type == OXB_POOL2D_TYPE_SENSOR_2D) {
+  out->_flags |= OXB_MANIFOLD2D_SENSOR;
   return true;
-
+ }
+ 
  /* manifold generation */
  float distance = oxb_sqrt(dist_squared);
 

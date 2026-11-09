@@ -18,13 +18,11 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
  float a_inv_mass;
  float a_inv_inertia;
  float a_restitution;
- float a_omega;
 
  oxb_vec2 b_velocity;
  float b_inv_mass;
  float b_inv_inertia;
  float b_restitution;
- float b_omega;
   
  switch(m->_a._type) {
   case OXB_POOL2D_TYPE_DYNAMIC_2D:
@@ -35,7 +33,6 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   	a_inv_mass = obj->_inv_mass;
   	a_inv_inertia = obj->_inv_rotational_inertia;
   	a_restitution = obj->_restitution;
-  	a_omega = obj->_omega;
   	used_color |= obj->_color_bits;
   	both_sleeping &= (obj->_flags & OXB_FLAG_SLEEP_2D) != 0;
   }
@@ -63,7 +60,6 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
    	break;
    }
    a_inv_inertia = 0.0f;
-  	a_omega = 0.0f;
   	used_color |= obj->_color_bits;
   }
   break;
@@ -75,7 +71,6 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   	a_inv_mass = 0.0f;
   	a_inv_inertia = 0.0f;
   	a_restitution = obj->_restitution;
-  	a_omega = 0.0f;
   }
   break;
   default:
@@ -92,7 +87,6 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   	b_inv_mass = obj->_inv_mass;
   	b_inv_inertia = obj->_inv_rotational_inertia;
   	b_restitution = obj->_restitution;
-  	b_omega = obj->_omega;
   	used_color |= obj->_color_bits;
   	both_sleeping &= (obj->_flags & OXB_FLAG_SLEEP_2D) != 0;
   }
@@ -120,7 +114,6 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
    	break;
    }
    b_inv_inertia = 0.0f;
-  	b_omega = 0.0f;
   	used_color |= obj->_color_bits;
   }
   break;
@@ -132,7 +125,6 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   	b_inv_mass = 0.0f;
   	b_inv_inertia = 0.0f;
   	b_restitution = obj->_restitution;
-  	b_omega = 0.0f;
   }
   break;
   default:
@@ -149,18 +141,14 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   if(obj_a->_priority < obj_b->_priority) {
   	a_velocity = oxb_vec2_load(obj_a->_velocity._arr);
   	a_inv_mass = 1.0f;
-  	a_omega = 1.0f;
   } else if(obj_a->_priority > obj_b->_priority) {
   	b_velocity = oxb_vec2_load(obj_b->_velocity._arr);
   	b_inv_mass = 1.0f;
-  	b_omega = 1.0f;
   } else {
   	a_velocity = oxb_vec2_load(obj_a->_velocity._arr);
   	b_velocity = oxb_vec2_load(obj_b->_velocity._arr);
   	a_inv_mass = 0.5f;
   	b_inv_mass = 0.5f;
-  	a_omega = 0.5f;
-  	b_omega = 0.5f;
   }
  }
 
@@ -240,57 +228,6 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
  {
  }
  
- /* resting state */
- const float vt = 1.2f;
- const float vo = 0.4f;
-
- if(m->_a._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
- 	oxb_dynamic2d *body = (oxb_dynamic2d*)a_obj;
-  if(!(body->_flags & OXB_FLAG_REST_2D)) {
-   if(oxb_vec2_dot(a_velocity, a_velocity) < vt && oxb_abs(a_omega) < vo) {
-    body->_resting_time += input->_dt;
-    if(body->_resting_time > 1.5f) {
-     body->_flags |= OXB_FLAG_REST_2D;
-     a_velocity = oxb_vec2_mul(a_velocity, oxb_vec2_splat(0.3f));
-     a_omega *= 0.3f;
-     body->_resting_time = 0.0f;
-    }
-   } else {
-    body->_resting_time = 0.0f;
-   }
-  } else {
-   if(oxb_vec2_dot(a_velocity, a_velocity) > vt || oxb_abs(a_omega) > vo) {
-    body->_resting_time = 0.0f;
-    body->_flags &= ~OXB_FLAG_REST_2D;
-   } 
-  }
- }
-
-
-
- if(m->_b._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
- 	oxb_dynamic2d *body = (oxb_dynamic2d*)b_obj;
-  if(!(body->_flags & OXB_FLAG_REST_2D)) {
-   if(oxb_vec2_dot(b_velocity, b_velocity) < vt && oxb_abs(b_omega) < vo) {
-    body->_resting_time += input->_dt;
-    if(body->_resting_time > 1.5f) {
-     body->_flags |= OXB_FLAG_REST_2D;
-     b_velocity = oxb_vec2_mul(b_velocity, oxb_vec2_splat(0.3f));
-     b_omega *= 0.3f;
-     body->_resting_time = 0.0f;
-    }
-   } else {
-    body->_resting_time = 0.0f;
-   }
-  } else {
-   if(oxb_vec2_dot(b_velocity, b_velocity) > vt || oxb_abs(b_omega) > vo) {
-    body->_resting_time = 0.0f;
-    body->_flags &= ~OXB_FLAG_REST_2D;
-   }
-  }
- }
- 
- 
  
  /* color creation for parallel solver. */
  uint32_t color = 0;
@@ -319,8 +256,6 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   {
   	oxb_dynamic2d *obj = (oxb_dynamic2d*)a_obj;
   	obj->_color_bits |= color_bit;
-  	oxb_vec2_store(obj->_velocity._arr, a_velocity);
-  	obj->_omega = a_omega;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -336,8 +271,6 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
   {
   	oxb_dynamic2d *obj = (oxb_dynamic2d*)b_obj;
   	obj->_color_bits |= color_bit;
-  	oxb_vec2_store(obj->_velocity._arr, b_velocity);
-  	obj->_omega = b_omega;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:

@@ -134,7 +134,7 @@ oxb_inline float oxb_floor(const float x) {
  return (float)(x < 0 && x != (float)i) ? i - 1 : i;
 }
 
-
+oxb_const uint32_t oxb_hash(uint32_t a);
 oxb_const uintptr_t oxb_alignto(const uintptr_t x, const uint8_t alignment);
 oxb_const uint32_t oxb_nextp2(const uint32_t x);
 
@@ -167,13 +167,27 @@ oxb_pure float oxb_exp(const float x);
 #if defined(__aarch64__)
 
 oxb_inline float oxb_rsqrt(const float x) {
+#ifdef __FAST_MATH__
+ /* my device has ≈0.2% max error */
  float o;
- __asm__ volatile (
-  "fsqrt %s0, %s1\n"
-  : "=w" (o)
-  : "w" (x)
+ __asm__(
+  "frsqrte %s0, %s1"
+  : "=w"(o)
+  : "w"(x)
  );
- return 1.0f / o;
+ return o;
+#else
+ float mx, mm, l;
+  __asm__(
+  "frsqrte %s0, %s3 \n"
+  "fmul    %s1, %s0, %s0 \n"
+  "frsqrts %s2, %s3, %s1 \n"
+  "fmul    %s0, %s0, %s2 \n"
+  : "=&w"(mx), "=&w"(mm), "=&w"(l)
+  : "w"(x)
+ );
+ return mx;
+#endif
 }
 
 oxb_inline float oxb_sqrt(const float x) {
@@ -233,7 +247,9 @@ oxb_inline float oxb_rsqrt(const float x) {
  mx =       bits.f;
  x_half =   x * 0.5f;
  f =        mx;
+#ifndef __FAST_MATH__
  f =        (f * (1.5f - (x_half * f * f)));
+#endif
  return f;
 }
 
@@ -246,12 +262,13 @@ oxb_inline float oxb_sqrt(const float x) {
  mx =       bits.f;
  x_half =   x * 0.5f;
  f =        mx;
+#ifndef __FAST_MATH__
  f =        (f * (1.5f - (x_half * f * f)));
+#endif
  return x * f;
 }
 
 #endif
-
 
 
 #ifdef __cplusplus

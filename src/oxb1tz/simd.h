@@ -99,6 +99,7 @@ oxb_inline oxb_vec4 oxb_vec4_exp2(oxb_vec4 x) {
  return out;
 }
 
+/*
 oxb_inline oxb_vec4 oxb_vec4_sqrt(oxb_vec4 x) {
 	oxb_vec4 out;
 #ifdef OXB_NEON
@@ -117,7 +118,24 @@ oxb_inline oxb_vec4 oxb_vec4_sqrt(oxb_vec4 x) {
 #endif
  return out;
 }
+*/
 
+oxb_inline oxb_vec4 oxb_vec4_rsqrt(oxb_vec4 x) {
+	oxb_vec4 out;
+#ifdef OXB_NEON
+ float32x4_t rsqrt = vrsqrteq_f32(x);
+#ifndef __FAST_MATH__
+ rsqrt = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x, rsqrt), rsqrt), rsqrt);
+#endif
+ out = rsqrt;
+#else
+ out._arr[0] = oxb_rsqrt(oxb_vec4_getx(x));
+ out._arr[1] = oxb_rsqrt(oxb_vec4_gety(x));
+ out._arr[2] = oxb_rsqrt(oxb_vec4_getz(x));
+ out._arr[3] = oxb_rsqrt(oxb_vec4_getw(x));
+#endif
+ return out;
+}
 
 /*
  batch integration, has to be performed with
@@ -183,7 +201,11 @@ oxb_inline void oxb_integrate2d_dynamic4(oxb_dynamic2d_batch4 *batch, oxb_vec2 g
  oxb_vec4 real_squared = oxb_vec4_mul(batch->_rotation_real, batch->_rotation_real);
  oxb_vec4 imag_squared = oxb_vec4_mul(batch->_rotation_imag, batch->_rotation_imag);
  oxb_vec4 len_squared = oxb_vec4_add(real_squared, imag_squared);
+ /*
  oxb_vec4 inv_len = oxb_vec4_div(one, oxb_vec4_sqrt(len_squared));
+ */
+ oxb_vec4 inv_len = oxb_vec4_rsqrt(len_squared);
+ 
  batch->_rotation_real = oxb_vec4_mul(batch->_rotation_real, inv_len);
  batch->_rotation_imag = oxb_vec4_mul(batch->_rotation_imag, inv_len);
 

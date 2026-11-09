@@ -1,5 +1,6 @@
 #include "oxb1tz/core2d/object2d.h"
 #include "oxb1tz/core2d/world2d.h"
+#include "oxb1tz/core2d/island2d.h"
 #include "oxb1tz/memory.h"
 #include "oxb1tz/simd.h"
 #include "oxb1tz/mask.h"
@@ -192,6 +193,7 @@ void oxb_dynamic2d_integrate4(oxb_dynamic2d *oxb_restrict const body, void *w, c
 }
 
 
+
 void oxb_dynamic2d_collider(oxb_collider2d *oxb_restrict const collider, const oxb_dynamic2d *oxb_restrict const body) {
  collider->_shape = body->_shape;
  collider->_aabb = body->_aabb;
@@ -202,6 +204,79 @@ void oxb_dynamic2d_collider(oxb_collider2d *oxb_restrict const collider, const o
 }
 
 
+
+void oxb_dynamic2d_updaterest(oxb_dynamic2d *oxb_restrict const body, void *w, const float dt) {
+ oxb_world2d *world = (oxb_world2d*)w;
+ /* resting state */
+ const float vt = world->_linear_rest_threshold;
+ const float vo = world->_angular_rest_threshold;
+
+ oxb_vec2 velocity = oxb_vec2_load(body->_velocity._arr);
+ if(!(body->_flags & OXB_FLAG_REST_2D)) {
+  if(oxb_vec2_dot(velocity, velocity) < vt && oxb_abs(body->_omega) < vo) {
+   body->_resting_time += dt;
+   if(body->_resting_time > world->_rest_time_threshold) {
+    body->_flags |= OXB_FLAG_REST_2D;
+    velocity = oxb_vec2_mul(velocity, oxb_vec2_splat(0.3f));
+    body->_omega *= 0.3f;
+    body->_resting_time = 0.0f;
+   }
+  } else {
+   body->_resting_time = 0.0f;
+  }
+ } else {
+  if(oxb_vec2_dot(velocity, velocity) > vt || oxb_abs(body->_omega) > vo) {
+   body->_resting_time = 0.0f;
+   body->_flags &= ~OXB_FLAG_REST_2D;
+  } 
+ }
+ oxb_vec2_store(body->_velocity._arr, velocity);
+}
+
+void oxb_dynamic2d_updatesleep(oxb_dynamic2d *oxb_restrict const body, void *w) {
+ oxb_world2d *world = (oxb_world2d*)w;
+ if(oxb_pool_id_isnull(body->_island_id)) {
+  bool resting = (body->_flags & OXB_FLAG_REST_2D) != 0;
+  body->_island_id = oxb_island2d_acquire(&world->_island, resting);
+ } else {
+  if(oxb_island2d_sleeping(&world->_island, body->_island_id)) {
+   body->_flags |= OXB_FLAG_SLEEP_2D;
+  } else {
+   body->_flags &= ~OXB_FLAG_SLEEP_2D;
+  }
+ }
+}
+
+
+void oxb_dynamic2d_wake(oxb_dynamic2d *oxb_restrict const body, void *w) {
+ oxb_world2d *world = (oxb_world2d*)w;
+
+ const float vt = world->_linear_rest_threshold;
+ const float vo = world->_angular_rest_threshold;
+ oxb_vec2 velocity = oxb_vec2_load(body->_velocity._arr);
+
+ if(oxb_vec2_dot(velocity, velocity) > vt || oxb_abs(body->_omega) > vo) {
+  body->_resting_time = 0.0f;
+  body->_flags &= ~OXB_FLAG_REST_2D;
+  body->_flags &= ~OXB_FLAG_SLEEP_2D;
+    
+  oxb_container_id group_id = oxb_island2d_groupid(&world->_island, body->_island_id);
+  oxb_island2d_group *group = oxb_container_get(&world->_island._group_container, group_id);
+  group->_sleeping = false;
+ }
+}
+
+void oxb_dynamic2d_forcewake(oxb_dynamic2d *oxb_restrict const body, void *w) {
+ oxb_world2d *world = (oxb_world2d*)w;
+
+ body->_resting_time = 0.0f;
+ body->_flags &= ~OXB_FLAG_REST_2D;
+ body->_flags &= ~OXB_FLAG_SLEEP_2D;
+    
+ oxb_container_id group_id = oxb_island2d_groupid(&world->_island, body->_island_id);
+ oxb_island2d_group *group = oxb_container_get(&world->_island._group_container, group_id);
+ group->_sleeping = false;
+}
 
 /**********************************************
 *                   kinematic

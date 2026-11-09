@@ -93,6 +93,7 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
  float divided_dt = dt / (float)world->_substeps;
 
  /* collisionphase */
+
  if(oxb_bvh2d_shouldrebuild(&world->_bvh2d, 5)) 
   oxb_bvh2d_mediansplit(&world->_bvh2d, &world->_pool2d);
 
@@ -124,6 +125,7 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   oxb_island2d_reset(&world->_island);
  }
 
+
  {
 
  for(size_t i = 0; i < world->_pool2d._containers[OXB_POOL2D_TYPE_JOINT_2D]._size; i++) {
@@ -141,13 +143,11 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   } else {
    if(node->_manifold._a._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
     oxb_dynamic2d *obj = oxb_pool2d_get(&world->_pool2d, node->_manifold._a);
-    obj->_flags &= ~OXB_FLAG_REST_2D;
-    obj->_flags &= ~OXB_FLAG_SLEEP_2D;
+    oxb_dynamic2d_forcewake(obj, world);
    }
    if(node->_manifold._b._type == OXB_POOL2D_TYPE_DYNAMIC_2D) {
     oxb_dynamic2d *obj = oxb_pool2d_get(&world->_pool2d, node->_manifold._b);
-    obj->_flags &= ~OXB_FLAG_REST_2D;
-    obj->_flags &= ~OXB_FLAG_SLEEP_2D;
+    oxb_dynamic2d_forcewake(obj, world);
    }
    oxb_contacthash2d_remove(&world->_contacts, node);
   }
@@ -171,9 +171,11 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
    oxb_dynamic2d_integrate4(dynamic_body, world, divided_dt);
  
    for(size_t j = 0; j < 4; j++) {
-   oxb_bvh2d_update(&world->_bvh2d, dynamic_body[j]._bvh_id, dynamic_body[j]._aabb);
-   bool resting = (dynamic_body[j]._flags & OXB_FLAG_REST_2D) != 0;
-   dynamic_body[j]._island_id = oxb_island2d_acquire(&world->_island, resting);
+    oxb_bvh2d_update(&world->_bvh2d, dynamic_body[j]._bvh_id, dynamic_body[j]._aabb);
+ 
+    bool resting = (dynamic_body[j]._flags & OXB_FLAG_REST_2D) != 0;
+    dynamic_body[j]._island_id = oxb_island2d_acquire(&world->_island, resting);
+    oxb_dynamic2d_updaterest(&dynamic_body[j], world, dt);
    }
   }
  
@@ -183,6 +185,8 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
    oxb_bvh2d_update(&world->_bvh2d, dynamic_body->_bvh_id, dynamic_body->_aabb);
    bool resting = (dynamic_body->_flags & OXB_FLAG_REST_2D) != 0;
    dynamic_body->_island_id = oxb_island2d_acquire(&world->_island, resting);
+  
+   oxb_dynamic2d_updaterest(dynamic_body, world, dt);
   }
  } else {
 
@@ -191,18 +195,10 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
    oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[OXB_POOL2D_TYPE_DYNAMIC_2D]._bytes) + i;
    oxb_dynamic2d_integrate4(dynamic_body, world, divided_dt);
  
-    for(size_t j = 0; j < 4; j++) {
-     oxb_bvh2d_update(&world->_bvh2d, dynamic_body[j]._bvh_id, dynamic_body[j]._aabb);
-     if(oxb_pool_id_isnull(dynamic_body[j]._island_id)) {
-      bool resting = (dynamic_body[j]._flags & OXB_FLAG_REST_2D) != 0;
-      dynamic_body[j]._island_id = oxb_island2d_acquire(&world->_island, resting);
-     } else {
-     if(oxb_island2d_sleeping(&world->_island, dynamic_body[j]._island_id)) {
-      dynamic_body[j]._flags |= OXB_FLAG_SLEEP_2D;
-     } else {
-      dynamic_body[j]._flags &= ~OXB_FLAG_SLEEP_2D;
-     }
-    }
+   for(size_t j = 0; j < 4; j++) {
+    oxb_bvh2d_update(&world->_bvh2d, dynamic_body[j]._bvh_id, dynamic_body[j]._aabb);
+    oxb_dynamic2d_updatesleep(&dynamic_body[j], world);
+    oxb_dynamic2d_updaterest(&dynamic_body[j], world, dt);
    }
   }
  
@@ -210,17 +206,8 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
    oxb_dynamic2d *dynamic_body = ((oxb_dynamic2d*)world->_pool2d._containers[OXB_POOL2D_TYPE_DYNAMIC_2D]._bytes) + i;
    oxb_dynamic2d_integrate(dynamic_body, world, divided_dt);
    oxb_bvh2d_update(&world->_bvh2d, dynamic_body->_bvh_id, dynamic_body->_aabb);
-
-   if(oxb_pool_id_isnull(dynamic_body->_island_id)) {
-    bool resting = (dynamic_body->_flags & OXB_FLAG_REST_2D) != 0;
-    dynamic_body->_island_id = oxb_island2d_acquire(&world->_island, resting);
-   } else {
-    if(oxb_island2d_sleeping(&world->_island, dynamic_body->_island_id)) {
-     dynamic_body->_flags |= OXB_FLAG_SLEEP_2D;
-    } else {
-     dynamic_body->_flags &= ~OXB_FLAG_SLEEP_2D;
-    }
-   }
+   oxb_dynamic2d_updatesleep(dynamic_body, world);
+   oxb_dynamic2d_updaterest(dynamic_body, world, dt);
   }
  
  } /* if reset island */
@@ -306,13 +293,23 @@ oxb_world2d* oxb_world2d_create(const oxb_world2d_info *oxb_restrict const info)
  world->_allocator = info->_allocator;
  world->_gravity = info->_gravity;
  world->_substeps = info->_substeps;
+ world->_linear_rest_threshold = info->_linear_rest_threshold;
+ world->_angular_rest_threshold = info->_angular_rest_threshold;
+ world->_rest_time_threshold = info->_rest_time_threshold;
  
  assert(info->_substeps != 0);
  
+ size_t initial_reserves[5] = {
+ 	info->_pool2d._dynamic_reserve,
+ 	info->_pool2d._kinematic_reserve,
+ 	info->_pool2d._static_reserve,
+ 	info->_pool2d._sensor_reserve,
+ 	info->_pool2d._joint_reserve
+ };
+ oxb_pool2d_create(&world->_pool2d, &world->_allocator, initial_reserves);
  
- oxb_pool2d_create(&world->_pool2d, &world->_allocator, 2);
- oxb_contacthash2d_create(&world->_contacts, &world->_allocator, 32);
- oxb_bvh2d_create(&world->_bvh2d, &world->_allocator, 32, 1024, 2.0f);
+ oxb_contacthash2d_create(&world->_contacts, &world->_allocator, info->_contacthash2d._buckets_reserve);
+ oxb_bvh2d_create(&world->_bvh2d, &world->_allocator, info->_bvh2d._node_reserve, info->_bvh2d._bump_reserve, info->_bvh2d._fat_margin);
  oxb_island2d_create(&world->_island, &world->_allocator, 5, 5);
  
  world->_pool2d._world = (void*)world;

@@ -98,10 +98,18 @@ void oxb_dynamic2d_init(oxb_dynamic2d *oxb_restrict const body, const oxb_object
 void oxb_dynamic2d_integrate(oxb_dynamic2d *oxb_restrict const body, void *w, const float dt);
 void oxb_dynamic2d_integrate4(oxb_dynamic2d *oxb_restrict const body, void *w, const float dt);
 void oxb_dynamic2d_collider(oxb_collider2d *oxb_restrict const collider, const oxb_dynamic2d *oxb_restrict const body);
+void oxb_dynamic2d_updaterest(oxb_dynamic2d *oxb_restrict const body, void *w, const float dt);
+void oxb_dynamic2d_updatesleep(oxb_dynamic2d *oxb_restrict const body, void *w);
+void oxb_dynamic2d_wake(oxb_dynamic2d *oxb_restrict const body, void *w);
+void oxb_dynamic2d_forcewake(oxb_dynamic2d *oxb_restrict const body, void *w);
+
+
 
 void oxb_kinematic2d_init(oxb_kinematic2d *oxb_restrict const body, const oxb_object2d_info *oxb_restrict const info);
 void oxb_kinematic2d_integrate(oxb_kinematic2d *oxb_restrict const body, const float dt);
 void oxb_kinematic2d_collider(oxb_collider2d *oxb_restrict const collider, const oxb_kinematic2d *oxb_restrict const body);
+
+
 
 void oxb_static2d_init(oxb_static2d *oxb_restrict const body, const oxb_object2d_info *oxb_restrict const info);
 void oxb_static2d_collider(oxb_collider2d *oxb_restrict const collider, const oxb_static2d *oxb_restrict const body);
