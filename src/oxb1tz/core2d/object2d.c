@@ -228,6 +228,9 @@ void oxb_dynamic2d_updaterest(oxb_dynamic2d *oxb_restrict const body, void *w, c
   if(oxb_vec2_dot(velocity, velocity) > vt || oxb_abs(body->_omega) > vo) {
    body->_resting_time = 0.0f;
    body->_flags &= ~OXB_FLAG_REST_2D;
+   velocity = oxb_vec2_mul(velocity, oxb_vec2_splat(0.3f * dt));
+   body->_omega *= 0.3f * dt;
+
   } 
  }
  oxb_vec2_store(body->_velocity._arr, velocity);

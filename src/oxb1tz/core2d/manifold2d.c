@@ -189,7 +189,9 @@ static uint8_t obb_clip_edge(oxb_vec2 edge[2], const oxb_vec2 normal, const floa
   out_ids[poly_size] = intersection_id;
   poly_size++;
  }
+ /*
  assert(poly_size == 2);
+ */
  edge[0] = out_edge[0];
  edge[1] = out_edge[1];
  ids[0] = out_ids[0];
@@ -361,8 +363,12 @@ bool oxb_manifold2d_box_vs_box(oxb_manifold2d *oxb_restrict const out, const oxb
  float neg_offset = -oxb_vec2_dot(oxb_vec3_low(ref_transform._basis[2]), ref_side_axis) + oxb_vec2_get(ref_half_size, ref_side_index);
 
  vertex_count = obb_clip_edge(edge, oxb_vec2_neg(ref_side_axis), neg_offset, BOX_NEGATE_AXIS[ref_side_index], ids);
+ if(vertex_count < 2)
+  return false;
  vertex_count = obb_clip_edge(edge, ref_side_axis, pos_offset, ref_side_index, ids); 
- 
+ if(vertex_count < 2)
+  return false;
+  
  const float front = oxb_vec2_dot(oxb_vec3_low(ref_transform._basis[2]), ref_axis) + oxb_vec2_get(ref_half_size, ref_index);
  if(swapped) {
 
