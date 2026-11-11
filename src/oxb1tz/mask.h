@@ -185,11 +185,11 @@ oxb_inline oxb_mask2 oxb_mask2_flte(const oxb_vec2 a, const oxb_vec2 b) {
 }
 
 
-oxb_inline oxb_mask2 oxb_mask2_fselect(const oxb_mask2 m, const oxb_vec2 a, const oxb_vec2 b) {
+oxb_inline oxb_vec2 oxb_mask2_fselect(const oxb_mask2 m, const oxb_vec2 a, const oxb_vec2 b) {
 #ifdef OXB_NEON
  return vbsl_f32(m, a, b);
 #else
- oxb_mask2 out;
+ oxb_vec2 out;
  out._arr[0] = m._arr[0] ? a._arr[0] : b._arr[0];
  out._arr[1] = m._arr[1] ? a._arr[1] : b._arr[1];
  return out;
@@ -383,11 +383,11 @@ oxb_inline oxb_mask4 oxb_mask4_flte(const oxb_vec4 a, const oxb_vec4 b) {
 #endif
 }
 
-oxb_inline oxb_mask4 oxb_mask4_fselect(const oxb_mask4 m, const oxb_vec4 a, const oxb_vec4 b) {
+oxb_inline oxb_vec4 oxb_mask4_fselect(const oxb_mask4 m, const oxb_vec4 a, const oxb_vec4 b) {
 #ifdef OXB_NEON
  return vbslq_f32(m, a, b);
 #else
- oxb_mask4 out;
+ oxb_vec4 out;
  out._arr[0] = m._arr[0] ? a._arr[0] : b._arr[0];
  out._arr[1] = m._arr[1] ? a._arr[1] : b._arr[1];
  out._arr[2] = m._arr[2] ? a._arr[2] : b._arr[2];

@@ -1,5 +1,6 @@
 #include "oxb1tz/queue.h"
 #include "oxb1tz/memory.h"
+#include "oxb1tz/math.h"
 
 static void resize(oxb_queue *oxb_restrict const c) {
  oxb_queue new_container;
@@ -13,7 +14,7 @@ static void resize(oxb_queue *oxb_restrict const c) {
   OXB_PANIC("queue allocation failed.");
  }
  for(size_t i = 0; i < c->_size; i++) {
-  oxb_memory_copy(&new_container._bytes[i * c->_stride], &c->_bytes[((c->_front + i) % c->_max_size) * c->_stride], c->_stride);
+  oxb_memory_copy(&new_container._bytes[i * c->_stride], &c->_bytes[((c->_front + i) & (c->_max_size - 1)) * c->_stride], c->_stride);
  }
  oxb_queue_destroy(c);
  *c = new_container;
@@ -22,7 +23,7 @@ static void resize(oxb_queue *oxb_restrict const c) {
 void oxb_queue_create(oxb_queue *oxb_restrict const c, oxb_allocator *oxb_restrict const alloc, const uint16_t stride, const size_t reserve) {
  assert(reserve != 0);
  c->_allocator = alloc;
- c->_max_size = reserve;
+ c->_max_size = oxb_nextp2(reserve);
  c->_size = 0;
  c->_front = 0;
  c->_stride = stride;
@@ -43,14 +44,14 @@ void oxb_queue_push(oxb_queue *oxb_restrict const c, const void *oxb_restrict co
  if(c->_size >= c->_max_size) {
   resize(c);
  }
- size_t rear = (c->_front + c->_size) % c->_max_size;
+ size_t rear = (c->_front + c->_size) & (c->_max_size - 1);
  oxb_memory_copy(&c->_bytes[rear * (size_t)c->_stride], data, c->_stride);
  c->_size++;
 }
 
 void oxb_queue_pop(oxb_queue *oxb_restrict const c) {
  assert(c->_size != 0);
- c->_front = (c->_front + 1) % c->_max_size;
+ c->_front = (c->_front + 1) & (c->_max_size - 1);
  c->_size--;
 }
 
