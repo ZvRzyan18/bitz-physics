@@ -43,6 +43,45 @@ oxb_inline oxb_vec2 oxb_vec2_log2(oxb_vec2 x) {
  return out;
 }
 
+oxb_inline oxb_vec4 oxb_vec4_log2(oxb_vec4 x) {
+	oxb_vec4 out;
+#ifdef OXB_NEON
+ static const float32x4_t one = {1.0f, 1.0f, 1.0f, 1.0f};
+ static const uint32x4_t bits1 = {1065353216U, 1065353216U, 1065353216U, 1065353216U};
+ static const uint32x4_t bits2 = {0x007FFFFF, 0x007FFFFF, 0x007FFFFF, 0x007FFFFF};
+ static const int32x4_t bias = {127, 127, 127, 127};
+
+ static const float32x4_t LOG2[5] = {
+  {-8.161580e-02f, -8.161580e-02f, -8.161580e-02f, -8.161580e-02f},
+  { 6.451423e-01f,  6.451423e-01f,  6.451423e-01f,  6.451423e-01f},
+  {-2.120675e-00f, -2.120675e-00f, -2.120675e-00f, -2.120675e-00f},
+  { 4.070090e-00f,  4.070090e-00f,  4.070090e-00f,  4.070090e-00f},
+  {-2.512854e-00f, -2.512854e-00f, -2.512854e-00f, -2.512854e-00f}
+ };
+
+ uint32x4_t small = vcltq_f32(x, one);
+ 
+ float32x4_t initial_val = vbslq_f32(small, oxb_vec4_div(one, x), x);
+ uint32x4_t bits = vreinterpretq_u32_f32(initial_val);
+ float32x4_t mantissa = vreinterpretq_f32_u32(vorrq_u32(vandq_u32(bits2, bits), bits1));
+ int32x4_t signed_value = vreinterpretq_s32_u32(vshrq_n_u32(bits, 23));
+ 
+ mantissa = oxb_vec4_fma(oxb_vec4_fma(oxb_vec4_fma(oxb_vec4_fma(LOG2[0], mantissa, LOG2[1]), mantissa, LOG2[2]), mantissa, LOG2[3]), mantissa, LOG2[4]);
+ signed_value = vsubq_s32(signed_value, bias);
+ out = vcvtq_f32_u32(signed_value);
+ out = vaddq_f32(out, mantissa);
+ out = vbslq_f32(small, vnegq_f32(out), out);
+#else
+ out._arr[0] = oxb_log2(oxb_vec4_getx(x));
+ out._arr[1] = oxb_log2(oxb_vec4_gety(x));
+ out._arr[2] = oxb_log2(oxb_vec4_getz(x));
+ out._arr[3] = oxb_log2(oxb_vec4_getw(x));
+
+#endif
+ return out;
+}
+
+
 
 oxb_inline oxb_vec2 oxb_vec2_exp2(oxb_vec2 x) {
 	oxb_vec2 out;
@@ -120,6 +159,23 @@ oxb_inline oxb_vec4 oxb_vec4_sqrt(oxb_vec4 x) {
 }
 */
 
+oxb_inline oxb_vec2 oxb_vec2_sqrt(oxb_vec2 x) {
+	oxb_vec2 out;
+#ifdef OXB_NEON
+#ifdef OXB_NEON_64
+ out = vsqrt_f32(x);
+#else
+ float32x2_t rsqrt = vrsqrte_f32(x);
+ rsqrt = vmul_f32(vrsqrts_f32(vmul_f32(x, rsqrt), rsqrt), rsqrt);
+ out = vmul_f32(x, rsqrt);
+#endif
+#else
+ out._arr[0] = oxb_sqrt(oxb_vec2_getx(x));
+ out._arr[1] = oxb_sqrt(oxb_vec2_gety(x));
+#endif
+ return out;
+}
+
 oxb_inline oxb_vec4 oxb_vec4_rsqrt(oxb_vec4 x) {
 	oxb_vec4 out;
 #ifdef OXB_NEON
@@ -136,6 +192,8 @@ oxb_inline oxb_vec4 oxb_vec4_rsqrt(oxb_vec4 x) {
 #endif
  return out;
 }
+
+
 
 /*
  batch integration, has to be performed with
@@ -212,6 +270,153 @@ oxb_inline void oxb_integrate2d_dynamic4(oxb_dynamic2d_batch4 *batch, oxb_vec2 g
  batch->_position_x = oxb_vec4_fma(batch->_velocity_x, dt_vec, batch->_position_x);   
  batch->_position_y = oxb_vec4_fma(batch->_velocity_y, dt_vec, batch->_position_y);   
 }
+
+
+
+
+typedef struct {
+ oxb_vec4    _r1_x[2];
+ oxb_vec4    _r1_y[2];
+ oxb_vec4    _r2_x[2];
+ oxb_vec4    _r2_y[2];
+
+ oxb_vec4    _normal_x[2];
+ oxb_vec4    _normal_y[2];
+ oxb_vec4    _depth[2];
+ oxb_vec4    _bias[2];
+ oxb_vec4    _mass_normal[2];
+ oxb_vec4    _mass_tangent[2];
+ oxb_vec4    _normal_lambda[2];
+ oxb_vec4    _tangent_lambda[2];
+ 
+ oxb_vec4    _static_friction;
+ oxb_vec4    _dynamic_friction;
+ oxb_vec4    _velocity_x[2];
+ oxb_vec4    _velocity_y[2];
+ oxb_vec4    _omega[2];
+ oxb_vec4    _inv_mass[2];
+ oxb_vec4    _inv_inertia[2];
+} oxb_manifold2d_batch4;
+
+
+oxb_inline void oxb_contact2d_solve4(oxb_manifold2d_batch4 *m, oxb_vec4 bias_coeff, oxb_vec4 mass_coeff, oxb_vec4 impulse_coeff, oxb_vec4 slop) {
+ static const oxb_vec4 zero = OXB_VEC4_INIT(0.0f, 0.0f, 0.0f, 0.0f);
+ 
+ for(size_t i = 0; i < 2; i++) {
+ 	
+ 	oxb_vec4 aocr1_x, aocr1_y;
+ 	oxb_vec4 bocr2_x, bocr2_y;
+ 	{
+ 	 aocr1_x = oxb_vec4_mul(oxb_vec4_neg(m->_omega[0]), m->_r1_y[i]);
+ 	 aocr1_y = oxb_vec4_mul(m->_omega[0], m->_r1_x[i]);
+
+   bocr2_x = oxb_vec4_mul(oxb_vec4_neg(m->_omega[1]), m->_r2_y[i]);
+ 	 bocr2_y = oxb_vec4_mul(m->_omega[1], m->_r2_x[i]);
+ 	}
+ 	
+ 	oxb_vec4 va_x = oxb_vec4_add(m->_velocity_x[0], aocr1_x);
+ 	oxb_vec4 va_y = oxb_vec4_add(m->_velocity_y[0], aocr1_y);
+
+ 	oxb_vec4 vb_x = oxb_vec4_add(m->_velocity_x[1], bocr2_x);
+ 	oxb_vec4 vb_y = oxb_vec4_add(m->_velocity_y[1], bocr2_y);
+ 	
+ 	oxb_vec4 relative_vel_x = oxb_vec4_sub(vb_x, va_x);
+ 	oxb_vec4 relative_vel_y = oxb_vec4_sub(vb_y, va_y);
+ 	oxb_vec4 vn = oxb_vec4_fma(relative_vel_x, m->_normal_x[i], oxb_vec4_mul(relative_vel_y, m->_normal_y[i]));
+
+  oxb_vec4 penetration_error;
+
+  oxb_mask4 depth_penetrating = oxb_mask4_flt(m->_depth[i], zero);
+  oxb_vec4 error = oxb_vec4_min(oxb_vec4_add(m->_depth[i], slop), zero);
+  penetration_error = oxb_mask4_fselect(depth_penetrating, oxb_vec4_mul(oxb_vec4_neg(error), bias_coeff), zero);
+
+  /*
+   logarithmic damping
+  */
+  oxb_vec4 inv_log2_e = oxb_vec4_splat(0.69314718f);
+  penetration_error = oxb_vec4_mul(oxb_vec4_log2(oxb_vec4_add(penetration_error, oxb_vec4_splat(1.0f))), inv_log2_e);
+  
+  penetration_error = oxb_vec4_add(oxb_vec4_neg(oxb_vec4_sub(vn, m->_bias[i])), penetration_error);
+
+
+
+  oxb_vec4 j;
+  {
+   oxb_vec4 mass = oxb_vec4_mul(m->_mass_normal[i], mass_coeff);
+	  j = oxb_vec4_mul(mass, penetration_error);
+   j = oxb_vec4_fma(oxb_vec4_neg(impulse_coeff), m->_normal_lambda[i], j);
+  }
+  {
+		 oxb_vec4 accumulated_normal = m->_normal_lambda[i];
+	 	m->_normal_lambda[i] = oxb_vec4_max(oxb_vec4_add(accumulated_normal, j), zero);
+		 j = oxb_vec4_sub(m->_normal_lambda[i], accumulated_normal);
+  }
+  oxb_vec4 impulse_x, impulse_y;
+  oxb_vec4 tmp;
+  {
+   impulse_x = oxb_vec4_mul(m->_normal_x[i], j);
+   impulse_y = oxb_vec4_mul(m->_normal_y[i], j);
+   m->_velocity_x[0] = oxb_vec4_fma(m->_inv_mass[0], impulse_x, m->_velocity_x[0]);
+   m->_velocity_y[0] = oxb_vec4_fma(m->_inv_mass[0], impulse_y, m->_velocity_y[0]);
+   m->_velocity_x[1] = oxb_vec4_fma(m->_inv_mass[1], impulse_x, m->_velocity_x[1]);
+   m->_velocity_y[1] = oxb_vec4_fma(m->_inv_mass[1], impulse_y, m->_velocity_y[1]);
+   tmp = oxb_vec4_fma(m->_r1_x[i], impulse_y, oxb_vec4_mul(oxb_vec4_neg(m->_r1_y[i]), impulse_x));
+	  m->_omega[0] = oxb_vec4_fma(m->_inv_inertia[0], tmp, m->_omega[0]);
+   tmp = oxb_vec4_fma(m->_r2_x[i], impulse_y, oxb_vec4_mul(oxb_vec4_neg(m->_r2_y[i]), impulse_x));
+	  m->_omega[1] = oxb_vec4_fma(m->_inv_inertia[1], tmp, m->_omega[1]);
+  }
+  
+  oxb_vec4 tangent_x = m->_normal_y[i];
+  oxb_vec4 tangent_y = oxb_vec4_neg(m->_normal_x[i]);
+ 	{
+ 	 aocr1_x = oxb_vec4_mul(oxb_vec4_neg(m->_omega[0]), m->_r1_y[i]);
+ 	 aocr1_y = oxb_vec4_mul(m->_omega[0], m->_r1_x[i]);
+
+   bocr2_x = oxb_vec4_mul(oxb_vec4_neg(m->_omega[1]), m->_r2_y[i]);
+ 	 bocr2_y = oxb_vec4_mul(m->_omega[1], m->_r2_x[i]);
+ 	}
+ 	
+  va_x = oxb_vec4_add(m->_velocity_x[0], aocr1_x);
+  va_y = oxb_vec4_add(m->_velocity_y[0], aocr1_y);
+
+  vb_x = oxb_vec4_add(m->_velocity_x[1], bocr2_x);
+  vb_y = oxb_vec4_add(m->_velocity_y[1], bocr2_y);
+ 	
+  relative_vel_x = oxb_vec4_sub(vb_x, va_x);
+  relative_vel_y = oxb_vec4_sub(vb_y, va_y);
+  oxb_vec4 vt = oxb_vec4_fma(relative_vel_x, tangent_x, oxb_vec4_mul(relative_vel_y, tangent_y));
+
+  j = oxb_vec4_mul(m->_mass_tangent[i], oxb_vec4_neg(vt));
+
+  oxb_vec4 dynamic_limit = oxb_vec4_mul(m->_dynamic_friction, m->_normal_lambda[i]);
+  oxb_vec4 static_limit = oxb_vec4_mul(m->_static_friction, m->_normal_lambda[i]);
+
+  oxb_vec4 prev_tangent = m->_tangent_lambda[i];
+  oxb_vec4 target_tangent = oxb_vec4_add(prev_tangent, j);
+  
+  oxb_mask4 switch_friction = oxb_mask4_fgt(oxb_vec4_abs(target_tangent), static_limit);
+
+  oxb_vec4 ta = oxb_vec4_min(oxb_vec4_max(target_tangent, oxb_vec4_neg(dynamic_limit)), dynamic_limit);
+  oxb_vec4 tb = target_tangent;
+  m->_tangent_lambda[i] = oxb_mask4_fselect(switch_friction, ta, tb);
+  j = oxb_vec4_sub(m->_tangent_lambda[i], prev_tangent);
+
+  {
+   impulse_x = oxb_vec4_mul(tangent_x, j);
+   impulse_y = oxb_vec4_mul(tangent_y, j);
+   m->_velocity_x[0] = oxb_vec4_fma(m->_inv_mass[0], impulse_x, m->_velocity_x[0]);
+   m->_velocity_y[0] = oxb_vec4_fma(m->_inv_mass[0], impulse_y, m->_velocity_y[0]);
+   m->_velocity_x[1] = oxb_vec4_fma(m->_inv_mass[1], impulse_x, m->_velocity_x[1]);
+   m->_velocity_y[1] = oxb_vec4_fma(m->_inv_mass[1], impulse_y, m->_velocity_y[1]);
+   tmp = oxb_vec4_fma(m->_r1_x[i], impulse_y, oxb_vec4_mul(oxb_vec4_neg(m->_r1_y[i]), impulse_x));
+	  m->_omega[0] = oxb_vec4_fma(m->_inv_inertia[0], tmp, m->_omega[0]);
+   tmp = oxb_vec4_fma(m->_r2_x[i], impulse_y, oxb_vec4_mul(oxb_vec4_neg(m->_r2_y[i]), impulse_x));
+	  m->_omega[1] = oxb_vec4_fma(m->_inv_inertia[1], tmp, m->_omega[1]);
+  }
+  
+ }
+}
+
 
 
 #endif

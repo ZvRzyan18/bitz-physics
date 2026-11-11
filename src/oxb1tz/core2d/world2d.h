@@ -20,9 +20,10 @@ struct oxb_world2d {
   
  oxb_vec2           _gravity;
   
+ oxb_queue          _color_group[33];
  uint32_t           _colors[32];
  uint32_t           _solo_manifolds;
-
+ 
  float              _linear_rest_threshold;
  float              _angular_rest_threshold;
  float              _rest_time_threshold;

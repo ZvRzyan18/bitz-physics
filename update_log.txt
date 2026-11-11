@@ -1,5 +1,11 @@
 # version 0.1.2
 
+• parallel solver through simd and color graph
+
+• refactor the solver2d.c
+
+• use fma when applying impulse
+
 • remove sqrt when checking normalized length squared
 
 • use arm64 native inverse sqrt
