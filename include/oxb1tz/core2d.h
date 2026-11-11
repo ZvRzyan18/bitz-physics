@@ -72,6 +72,7 @@ typedef struct {
  float    _linear_rest_threshold;
  float    _angular_rest_threshold;
  float    _rest_time_threshold;
+ float    _penetration_slop;
  uint8_t  _substeps;
 } oxb_world2d_info;
 
