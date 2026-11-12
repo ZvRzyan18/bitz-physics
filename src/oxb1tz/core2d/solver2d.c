@@ -202,7 +202,6 @@ static void set_object_tmp(oxb_object_tmp *oxb_restrict const tmp) {
   	oxb_dynamic2d *obj = (oxb_dynamic2d*)tmp[0]._obj;
   	oxb_vec2_store(obj->_velocity._arr, tmp[0]._velocity);
    obj->_omega = tmp[0]._omega;
-   obj->_color_bits =	tmp[0]._color;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -210,7 +209,6 @@ static void set_object_tmp(oxb_object_tmp *oxb_restrict const tmp) {
   	oxb_kinematic2d *obj = (oxb_kinematic2d*)tmp[0]._obj;
   	oxb_vec2_store(obj->_velocity._arr, tmp[0]._velocity);
    obj->_omega = tmp[0]._omega;
-   obj->_color_bits =	tmp[0]._color;
   }
   break;
   case OXB_POOL2D_TYPE_STATIC_2D:
@@ -250,13 +248,12 @@ static void set_object_tmp(oxb_object_tmp *oxb_restrict const tmp) {
 }
 
 
-static void set_object_color_tmp(oxb_object_tmp *oxb_restrict const tmp, const oxb_solver2d_input *oxb_restrict const input) {
+static void set_object_color_tmp(oxb_object_tmp *oxb_restrict const tmp) {
  switch(tmp[0]._handle._type) {
   case OXB_POOL2D_TYPE_DYNAMIC_2D:
   {
   	oxb_dynamic2d *obj = (oxb_dynamic2d*)tmp[0]._obj;
    obj->_color_bits =	tmp[0]._color;
-   oxb_dynamic2d_updaterest(obj, input->_ctx, input->_dt);
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -279,7 +276,6 @@ static void set_object_color_tmp(oxb_object_tmp *oxb_restrict const tmp, const o
   {
   	oxb_dynamic2d *obj = (oxb_dynamic2d*)tmp[1]._obj;
    obj->_color_bits =	tmp[1]._color;
-   oxb_dynamic2d_updaterest(obj, input->_ctx, input->_dt);
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -332,10 +328,12 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
  oxb_object_tmp obj[2];
  oxb_memory_set(obj, 0, sizeof(oxb_object_tmp) * 2);
  
+ assert(!oxb_handle_isnull(m->_a));
+ assert(!oxb_handle_isnull(m->_b));
  obj[0]._handle = m->_a;
  obj[1]._handle = m->_b;
  get_object_tmp(obj, pool, false, &both_sleeping);
-  
+ 
  if(both_sleeping)
   goto skip_solver;
  
@@ -414,7 +412,8 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
  skip_solver:
  {
  }
-
+ (void)input;
+ 
  uint32_t used_color = obj[0]._color | obj[1]._color;
  
  /* color creation for parallel solver. */
@@ -423,25 +422,20 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
  while(color < 32 && (used_color & (1u << color)))
   ++color;
  
- oxb_world2d *world = (oxb_world2d*)input->_ctx;
-
  m->_flags &= ~OXB_MANIFOLD2D_SOLO;
  m->_flags &= ~OXB_MANIFOLD2D_COLOR;
  uint32_t color_bit = 0;
-
+ 
  if(color >= 32) {
   m->_flags |= OXB_MANIFOLD2D_SOLO;
-  world->_solo_manifolds++;
   color_bit = 0;
  } else {
-  world->_colors[color]++;
   m->_flags |= (uint8_t)(color & OXB_MANIFOLD2D_COLOR);
   color_bit = 1u << color;
+  obj[0]._color |= color_bit;
+  obj[1]._color |= color_bit;
+  set_object_color_tmp(obj);
  }
-
- obj[0]._color |= color_bit;
- obj[1]._color |= color_bit;
- set_object_color_tmp(obj, input);
 }
 
 
@@ -517,13 +511,9 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
 
 		float vn = oxb_vec2_dot(relative_vel, normal);
 
-
   float penetration_error = 0.0f;
-  
-  if(depth < 0.0f) {
-   float error = oxb_min((depth + input->_penetration_slop), 0.0f);
-   penetration_error = -error * input->_bias_coeff;
-  }
+  float error = oxb_min((depth + input->_penetration_slop), 0.0f);
+  penetration_error = -error * input->_bias_coeff;
 
   /* 
    logarithmic with damping-like behaviour 

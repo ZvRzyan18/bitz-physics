@@ -36,13 +36,48 @@ oxb_pool_id oxb_island2d_acquire(oxb_island2d *oxb_restrict const island, const 
 
 
 /* simple find, with path compression */
+/*
 oxb_pool_id oxb_island2d_find(oxb_island2d *oxb_restrict const island, const oxb_pool_id h) {
  oxb_island2d_node *node = oxb_pool_get(&island->_node_pool, h);
  if(!oxb_pool_id_isequal(node->_leader, h)) 
   node->_leader = oxb_island2d_find(island, node->_leader);
  return node->_leader;
 }
+*/
+/*
+oxb_pool_id oxb_island2d_find(oxb_island2d *oxb_restrict const island, const oxb_pool_id h) {
+ oxb_pool_id root = h;
+ while(1) {
+  oxb_island2d_node *node = oxb_pool_get(&island->_node_pool, root);
+  if(oxb_pool_id_isequal(node->_leader, root))
+   break;
+  root = node->_leader;
+ }
+ oxb_pool_id current = h;
+ while(!oxb_pool_id_isequal(current, root)) {
+  oxb_island2d_node *node = oxb_pool_get(&island->_node_pool, current);
+  oxb_pool_id next = node->_leader;
+  node->_leader = root;
+  current = next;
+ }
+ return root;
+}
+*/
+oxb_pool_id oxb_island2d_find(oxb_island2d *oxb_restrict const island, const oxb_pool_id h) {
+ oxb_pool_id current = h;
+ while(1) {
+  oxb_island2d_node *node =
+  oxb_pool_get(&island->_node_pool, current);
+  oxb_pool_id leader = node->_leader;
+  if(oxb_pool_id_isequal(leader, current))
+   return current;
 
+  oxb_island2d_node *leader_node = oxb_pool_get(&island->_node_pool, leader);
+  oxb_pool_id higher_leader = leader_node->_leader;
+  node->_leader = higher_leader;
+  current = higher_leader;
+ }
+}
 
 void oxb_island2d_merge(oxb_island2d *oxb_restrict const island, const oxb_pool_id a, const oxb_pool_id b) {
  oxb_pool_id ha = oxb_island2d_find(island, a);
