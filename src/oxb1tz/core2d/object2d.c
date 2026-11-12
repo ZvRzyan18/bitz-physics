@@ -115,7 +115,7 @@ void oxb_dynamic2d_integrate(oxb_dynamic2d *oxb_restrict const body, void *w, co
  
  velocity = oxb_vec2_mul(velocity, linear_damping);
  omega *= angular_damping;
- omega = oxb_max(oxb_min(omega, 2.6f), -2.6f);
+ omega = oxb_max(oxb_min(omega, world->_max_omega), -world->_max_omega);
 
  /* lock the position and rotation */
  static const oxb_mask4 poslock_mask = OXB_MASK4_INIT((uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSY_2D, (uint32_t)OXB_FLAG_LOCK_ROT_2D, 0);
@@ -173,7 +173,7 @@ void oxb_dynamic2d_integrate4(oxb_dynamic2d *oxb_restrict const body, void *w, c
  }
  
  
- oxb_integrate2d_dynamic4(&batch, world->_gravity, oxb_vec4_splat(dt));
+ oxb_integrate2d_dynamic4(&batch, world->_gravity, oxb_vec4_splat(dt), world->_max_omega);
   
  for(size_t i = 0; i < 4; i++) {
   if(body[i]._flags & OXB_FLAG_SLEEP_2D)

@@ -138,26 +138,9 @@ oxb_inline oxb_vec4 oxb_vec4_exp2(oxb_vec4 x) {
  return out;
 }
 
-/*
-oxb_inline oxb_vec4 oxb_vec4_sqrt(oxb_vec4 x) {
-	oxb_vec4 out;
-#ifdef OXB_NEON
-#ifdef OXB_NEON_64
- out = vsqrtq_f32(x);
-#else
- float32x4_t rsqrt = vrsqrteq_f32(x);
- rsqrt = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x, rsqrt), rsqrt), rsqrt);
- out = vmulq_f32(x, rsqrt);
-#endif
-#else
- out._arr[0] = oxb_sqrt(oxb_vec4_getx(x));
- out._arr[1] = oxb_sqrt(oxb_vec4_gety(x));
- out._arr[2] = oxb_sqrt(oxb_vec4_getz(x));
- out._arr[3] = oxb_sqrt(oxb_vec4_getw(x));
-#endif
- return out;
-}
-*/
+
+
+
 
 oxb_inline oxb_vec2 oxb_vec2_sqrt(oxb_vec2 x) {
 	oxb_vec2 out;
@@ -175,6 +158,9 @@ oxb_inline oxb_vec2 oxb_vec2_sqrt(oxb_vec2 x) {
 #endif
  return out;
 }
+
+
+
 
 oxb_inline oxb_vec4 oxb_vec4_rsqrt(oxb_vec4 x) {
 	oxb_vec4 out;
@@ -215,7 +201,7 @@ typedef struct {
  oxb_mask4 _flags;
 } oxb_dynamic2d_batch4;
 
-oxb_inline void oxb_integrate2d_dynamic4(oxb_dynamic2d_batch4 *batch, oxb_vec2 gravity, oxb_vec4 dt_vec) {
+oxb_inline void oxb_integrate2d_dynamic4(oxb_dynamic2d_batch4 *batch, oxb_vec2 gravity, oxb_vec4 dt_vec, float max_omega) {
  oxb_vec4 gravity_x = oxb_vec4_splat(oxb_vec2_getx(gravity));
  oxb_vec4 gravity_y = oxb_vec4_splat(oxb_vec2_gety(gravity));
 
@@ -226,7 +212,7 @@ oxb_inline void oxb_integrate2d_dynamic4(oxb_dynamic2d_batch4 *batch, oxb_vec2 g
  batch->_velocity_x = oxb_vec4_mul(batch->_velocity_x, linear_damp);
  batch->_velocity_y = oxb_vec4_mul(batch->_velocity_y, linear_damp);
  batch->_omega = oxb_vec4_mul(batch->_omega, oxb_vec4_exp2(oxb_vec4_mul(batch->_angular_damping, dt_vec)));
- batch->_omega = oxb_vec4_max(oxb_vec4_min(batch->_omega, oxb_vec4_splat(2.6f)), oxb_vec4_splat(-2.6f));
+ batch->_omega = oxb_vec4_max(oxb_vec4_min(batch->_omega, oxb_vec4_splat(max_omega)), oxb_vec4_splat(-max_omega));
 
  /* lock mask */
  static const oxb_mask4 posx_lock = OXB_MASK4_INIT((uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSX_2D, (uint32_t)OXB_FLAG_LOCK_POSX_2D);
@@ -326,10 +312,9 @@ oxb_inline void oxb_contact2d_solve4(oxb_manifold2d_batch4 *m, oxb_vec4 bias_coe
 
   oxb_vec4 penetration_error;
 
-  oxb_mask4 depth_penetrating = oxb_mask4_flt(m->_depth[i], zero);
   oxb_vec4 error = oxb_vec4_min(oxb_vec4_add(m->_depth[i], slop), zero);
-  penetration_error = oxb_mask4_fselect(depth_penetrating, oxb_vec4_mul(oxb_vec4_neg(error), bias_coeff), zero);
-
+  penetration_error = oxb_vec4_mul(oxb_vec4_neg(error), bias_coeff);
+  
   /*
    logarithmic damping
   */

@@ -81,7 +81,9 @@ static const oxb_handle OXB_HANDLE_NULL = {OXB_ID_MAX, 0xFF};
 oxb_inline bool oxb_handle_isequal(oxb_handle a, oxb_handle b) {
  return a._type == b._type && a._id == b._id;
 }
-
+oxb_inline bool oxb_handle_isnull(oxb_handle a) {
+ return oxb_handle_isequal(a, OXB_HANDLE_NULL);
+}
 /*
  allocator type
 */

@@ -468,6 +468,7 @@ left     / \
  • a_right - b_left
  • a_right - b_right
 */
+
 oxb_noinline static void traverse_pair_recursive(oxb_bvh2d *const bvh, oxb_pool_id a_id, oxb_pool_id b_id, void (*func)(oxb_handle, oxb_handle, void *), void *ptr, uint32_t depth, oxb_bvh2d_traversalinfo *info) {
  if(oxb_pool_id_isnull(a_id) || oxb_pool_id_isnull(b_id))
   return;
@@ -511,11 +512,12 @@ oxb_noinline static void traverse_pair_recursive(oxb_bvh2d *const bvh, oxb_pool_
 oxb_noinline static void traverse_self_recursive(oxb_bvh2d *const bvh, oxb_pool_id n_id, void (*func)(oxb_handle, oxb_handle, void *), void *ptr, uint32_t depth, oxb_bvh2d_traversalinfo *info) {
  if(oxb_pool_id_isnull(n_id))
   return;
-
+  
  oxb_bvh2d_node *n = (oxb_bvh2d_node *)oxb_pool_get(&bvh->_pool, n_id);
- if(is_leaf(*n)) return;
-
  info->_node_visits++;
+ if(is_leaf(*n))
+  return;
+ 
  info->_max_depth = info->_max_depth < depth ? depth : info->_max_depth;
 
  traverse_self_recursive(bvh, n->_left, func, ptr, depth + 1, info);
@@ -530,7 +532,7 @@ oxb_noinline static void traverse_single_body(oxb_bvh2d *const bvh, oxb_pool_id 
 
  if(oxb_pool_id_isequal(id, t))
   return;
-  
+
  oxb_bvh2d_node *a = (oxb_bvh2d_node*)oxb_pool_get(&bvh->_pool, id);
  oxb_bvh2d_node *b = (oxb_bvh2d_node*)oxb_pool_get(&bvh->_pool, t);
  
