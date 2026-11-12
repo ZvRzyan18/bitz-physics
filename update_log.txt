@@ -1,5 +1,11 @@
 # version 0.1.2
 
+• fix prepare crash
+
+• change island DSU find from recursion into loop
+
+• improve sleeping
+
 • parallel solver through simd and color graph
 
 • refactor the solver2d.c
