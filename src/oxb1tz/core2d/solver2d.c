@@ -16,9 +16,8 @@ typedef struct {
  uint32_t   _color;
 } oxb_object_tmp;
 
-static void get_object_tmp(oxb_object_tmp *oxb_restrict const tmp, oxb_pool2d *oxb_restrict const pool, const bool invert_mass_sign, bool *oxb_restrict const both_sleeping_state) { 
+static void get_object_tmp(oxb_object_tmp *oxb_restrict const tmp, oxb_pool2d *oxb_restrict const pool, const bool invert_mass_sign) { 
  bool both_kinematics = false;
- bool both_sleeping = true;
  
  switch(tmp[0]._handle._type) {
   case OXB_POOL2D_TYPE_DYNAMIC_2D:
@@ -37,7 +36,6 @@ static void get_object_tmp(oxb_object_tmp *oxb_restrict const tmp, oxb_pool2d *o
   	tmp[0]._restitution = obj->_restitution;
   	tmp[0]._friction = oxb_vec2_load(obj->_friction._arr);
   	tmp[0]._color = obj->_color_bits;
-  	both_sleeping &= (obj->_flags & OXB_FLAG_SLEEP_2D) != 0;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -102,7 +100,6 @@ static void get_object_tmp(oxb_object_tmp *oxb_restrict const tmp, oxb_pool2d *o
   	tmp[1]._restitution = obj->_restitution;
   	tmp[1]._friction = oxb_vec2_load(obj->_friction._arr);
   	tmp[1]._color = obj->_color_bits;
-  	both_sleeping &= (obj->_flags & OXB_FLAG_SLEEP_2D) != 0;
   }
   break;
   case OXB_POOL2D_TYPE_KINEMATIC_2D:
@@ -154,8 +151,6 @@ static void get_object_tmp(oxb_object_tmp *oxb_restrict const tmp, oxb_pool2d *o
    oxb_unreachable();
  }
  
- *both_sleeping_state = both_sleeping;
-
  if(both_kinematics) {
  	oxb_kinematic2d *obj_a = (oxb_kinematic2d*)tmp[0]._obj;
  	oxb_kinematic2d *obj_b = (oxb_kinematic2d*)tmp[1]._obj;
@@ -323,8 +318,6 @@ bool oxb_solver2d_contact_sleeping(oxb_manifold2d *oxb_restrict const m, oxb_poo
  with soft constraints
 */
 void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
- bool both_sleeping;
-
  oxb_object_tmp obj[2];
  oxb_memory_set(obj, 0, sizeof(oxb_object_tmp) * 2);
  
@@ -332,9 +325,9 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
  assert(!oxb_handle_isnull(m->_b));
  obj[0]._handle = m->_a;
  obj[1]._handle = m->_b;
- get_object_tmp(obj, pool, false, &both_sleeping);
+ get_object_tmp(obj, pool, false);
  
- if(both_sleeping)
+ if(oxb_solver2d_contact_sleeping(m, pool))
   goto skip_solver;
  
  float inv_mass = obj[0]._inv_mass + obj[1]._inv_mass;
@@ -440,21 +433,16 @@ void oxb_solver2d_contact_prepare(oxb_manifold2d *oxb_restrict const m, oxb_pool
 
 
 void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
-
  (void)input;
-
- bool both_sleeping;
 
  oxb_object_tmp obj[2];
  oxb_memory_set(obj, 0, sizeof(oxb_object_tmp) * 2);
 
  obj[0]._handle = m->_a;
  obj[1]._handle = m->_b;
- get_object_tmp(obj, pool, true, &both_sleeping);
-  
- if(both_sleeping)
-  return;
- 
+ get_object_tmp(obj, pool, true);
+
+
  for(uint8_t i = 0; i < m->_contact_count; i++) {
  	oxb_contact2d *const contact = m->_contacts + i;
 
@@ -478,19 +466,14 @@ void oxb_solver2d_contact_presolve(oxb_manifold2d *oxb_restrict const m, oxb_poo
 }
 
 
-void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
- bool both_sleeping;
-
+static void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
  oxb_object_tmp obj[2];
  oxb_memory_set(obj, 0, sizeof(oxb_object_tmp) * 2);
 
  obj[0]._handle = m->_a;
  obj[1]._handle = m->_b;
- get_object_tmp(obj, pool, true, &both_sleeping);
+ get_object_tmp(obj, pool, true);
   
- if(both_sleeping)
-  return;
-
  oxb_vec2 friction = oxb_vec2_sqrt(oxb_vec2_mul(obj[0]._friction, obj[1]._friction));
  float static_friction = oxb_vec2_getx(friction);
  float dynamic_friction = oxb_vec2_gety(friction);
@@ -594,10 +577,9 @@ void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb_pool2d
 }
 
 
-void oxb_solver2d_contact_solve4(oxb_manifold2d *oxb_restrict const m[4], oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
+static void oxb_solver2d_contact_solve4(oxb_manifold2d *oxb_restrict const m[4], oxb_pool2d *oxb_restrict const pool, const oxb_solver2d_input *oxb_restrict const input) {
  oxb_object_tmp obj[4][2];
  oxb_memory_set(obj, 0, sizeof(oxb_object_tmp) * 4 * 2);
- bool both_sleeping = false;
  
  oxb_manifold2d_batch4 batch;
  oxb_memory_set(&batch, 0, sizeof(oxb_manifold2d_batch4));
@@ -605,7 +587,7 @@ void oxb_solver2d_contact_solve4(oxb_manifold2d *oxb_restrict const m[4], oxb_po
  for(size_t i = 0; i < 4; i++) {
   obj[i][0]._handle = m[i]->_a;
   obj[i][1]._handle = m[i]->_b;
-  get_object_tmp(obj[i], pool, true, &both_sleeping);
+  get_object_tmp(obj[i], pool, true);
 
   oxb_vec2 friction = oxb_vec2_sqrt(oxb_vec2_mul(obj[i][0]._friction, obj[i][1]._friction));
   float static_friction = oxb_vec2_getx(friction);
@@ -670,6 +652,69 @@ void oxb_solver2d_contact_solve4(oxb_manifold2d *oxb_restrict const m[4], oxb_po
   }
  	
  	set_object_tmp(obj[i]);
+ }
+}
+
+
+
+/*
+ it iterates through the array of oxb_contacthash2d_node's id
+*/
+void oxb_solver2d_contact_presolve_iterate(void *oxb_restrict const ptr, const size_t begin, const size_t end, const oxb_solver2d_input *oxb_restrict const input) {
+ oxb_world2d *world = input->_ctx;
+ size_t i = begin;
+ oxb_container_id *current_id = (oxb_container_id*)ptr;
+
+ for(; (i + 8) <= end; i += 8) {
+  oxb_contacthash2d_node *node = (oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i]);
+  oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
+  
+  node = (oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i + 1]);
+  oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
+
+  node = (oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i + 2]);
+  oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
+
+  node = (oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i + 3]);
+  oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
+
+  node = (oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i + 4]);
+  oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
+
+  node = (oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i + 5]);
+  oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
+
+  node = (oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i + 6]);
+  oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
+  
+  node = (oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i + 7]);
+  oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
+ }
+
+ for(; i < end; i++) {
+  oxb_contacthash2d_node *node = (oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i]);
+  oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
+ }
+}
+
+
+
+void oxb_solver2d_contact_solve_iterate(void *oxb_restrict const ptr, const size_t begin, const size_t end, const oxb_solver2d_input *oxb_restrict const input) {
+ oxb_world2d *world = input->_ctx;
+ oxb_container_id *current_id = (oxb_container_id*)ptr;
+
+ size_t i = begin;
+ for(; (i + 4) <= end; i += 4) {
+  oxb_manifold2d *manifolds[4];
+  manifolds[0] = &((oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i]))->_manifold;
+  manifolds[1] = &((oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i + 1]))->_manifold;
+  manifolds[2] = &((oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i + 2]))->_manifold;
+  manifolds[3] = &((oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i + 3]))->_manifold;
+  oxb_solver2d_contact_solve4(manifolds, &world->_pool2d, &world->_input);
+ }
+ for(; i < end; i++) {
+  oxb_contacthash2d_node *node = (oxb_contacthash2d_node*)oxb_container_get(&world->_contacts._pool, current_id[i]);
+  oxb_solver2d_contact_solve(&node->_manifold, &world->_pool2d, &world->_input);
  }
 }
 

@@ -68,13 +68,23 @@ typedef struct {
  } _contacthash2d;
  
  oxb_allocator _allocator;
- oxb_vec2 _gravity;
- float    _linear_rest_threshold;
- float    _angular_rest_threshold;
- float    _rest_time_threshold;
- float    _penetration_slop;
- float    _max_omega;
- uint8_t  _substeps;
+ oxb_vec2      _gravity;
+ 
+ float         _linear_rest_threshold;
+ float         _angular_rest_threshold;
+ float         _rest_time_threshold;
+ float         _penetration_slop;
+ float         _max_omega;
+ uint8_t       _substeps;
+
+
+ 
+ oxb_core2d_process _worker_process;
+ oxb_core2d_enqueue _worker_enqueue;
+ oxb_core2d_isfinished _worker_finished;
+ oxb_core2d_wait    _worker_wait;
+ uint8_t            _worker_count;
+
 } oxb_world2d_info;
 
 

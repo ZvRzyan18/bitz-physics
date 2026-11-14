@@ -19,8 +19,14 @@ struct oxb_world2d {
  oxb_island2d       _island;
   
  oxb_vec2           _gravity;
-  
+ /* collection of active independent batch */
  oxb_queue          _color_group[33];
+
+ oxb_core2d_enqueue _worker_enqueue;
+ oxb_core2d_isfinished _worker_finished;
+ oxb_core2d_wait    _worker_wait;
+ void               **_fences;
+ uint8_t            _worker_count;
 
  float              _linear_rest_threshold;
  float              _angular_rest_threshold;

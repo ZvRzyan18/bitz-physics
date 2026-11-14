@@ -103,6 +103,8 @@ void oxb_dynamic2d_updatesleep(oxb_dynamic2d *oxb_restrict const body, void *w);
 void oxb_dynamic2d_wake(oxb_dynamic2d *oxb_restrict const body, void *w);
 void oxb_dynamic2d_forcewake(oxb_dynamic2d *oxb_restrict const body, void *w);
 
+void oxb_dynamic2d_integrate_iterate(oxb_dynamic2d *oxb_restrict const body, const size_t begin, const size_t end, void *w, const float dt);
+
 
 
 void oxb_kinematic2d_init(oxb_kinematic2d *oxb_restrict const body, const oxb_object2d_info *oxb_restrict const info);
