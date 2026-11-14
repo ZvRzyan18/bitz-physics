@@ -1,5 +1,7 @@
 # version 0.1.2
 
+• refactor the main update function
+
 • fix prepare crash
 
 • change island DSU find from recursion into loop

@@ -281,6 +281,31 @@ void oxb_dynamic2d_forcewake(oxb_dynamic2d *oxb_restrict const body, void *w) {
  group->_sleeping = false;
 }
 
+
+/*
+ array of dynamic body to integrate
+*/
+void oxb_dynamic2d_integrate_iterate(oxb_dynamic2d *oxb_restrict const body, const size_t begin, const size_t end, void *w, const float dt) {
+ size_t i = begin;
+ for(; (i + 32) <= end; i += 32) {
+  oxb_dynamic2d_integrate4(body + i +  0, w, dt);
+  oxb_dynamic2d_integrate4(body + i +  4, w, dt);
+  oxb_dynamic2d_integrate4(body + i +  8, w, dt);
+  oxb_dynamic2d_integrate4(body + i + 12, w, dt);
+  oxb_dynamic2d_integrate4(body + i + 16, w, dt);
+  oxb_dynamic2d_integrate4(body + i + 20, w, dt);
+  oxb_dynamic2d_integrate4(body + i + 24, w, dt);
+  oxb_dynamic2d_integrate4(body + i + 28, w, dt);
+ }
+ for(; (i + 4) <= end; i += 4) {
+  oxb_dynamic2d_integrate4(body + i, w, dt);
+ }
+ for(; i < end; i++) {
+  oxb_dynamic2d_integrate(body + i, w, dt);
+ }
+}
+
+
 /**********************************************
 *                   kinematic
 **********************************************/
