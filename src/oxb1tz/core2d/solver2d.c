@@ -504,6 +504,7 @@ static void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb
    it uses natural logarithm because it never exceed linear line throughout its domain
    unlike with log2 graph curve which might inject extra energy.
   */
+  
   penetration_error = oxb_log(penetration_error + 1.0f);
   penetration_error = -(vn - contact->_bias) + penetration_error;
   
@@ -527,7 +528,6 @@ static void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb
 	 obj[1]._velocity = oxb_vec2_fma(oxb_vec2_splat(obj[1]._inv_mass), impulse, obj[1]._velocity);
 	 obj[1]._omega = oxb_fma(obj[1]._inv_inertia, oxb_vec2_cross(r2, impulse), obj[1]._omega);
 	
-	
  /*
   tangent / friction impulse
   
@@ -543,7 +543,8 @@ static void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb
   • resist sliding behaviour 
   • always perpendicular or 90°
  */
-  
+
+
 	 va = oxb_vec2_add(obj[0]._velocity, oxb_vec2_scross(obj[0]._omega, r1));
   vb = oxb_vec2_add(obj[1]._velocity, oxb_vec2_scross(obj[1]._omega, r2));
 	 relative_vel = oxb_vec2_sub(vb, va);
@@ -564,7 +565,6 @@ static void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb
    }
    j = contact->_tangent_lambda - prev_tangent;
   }
-
 
   impulse = oxb_vec2_mul(oxb_vec2_splat(j), tangent);
  	obj[0]._velocity = oxb_vec2_fma(oxb_vec2_splat(obj[0]._inv_mass), impulse, obj[0]._velocity);

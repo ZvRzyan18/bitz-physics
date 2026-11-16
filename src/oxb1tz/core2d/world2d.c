@@ -98,7 +98,6 @@ oxb_noinline static void broadphase_query(oxb_handle ha, oxb_handle hb, void *w)
 oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const world, const float dt) {
  float divided_dt = dt / (float)world->_substeps;
 
-
  float damping_ratio = 2.6f;
  float hertz = 9.33f;
 
@@ -149,8 +148,9 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   if(node->_manifold._flags & OXB_MANIFOLD2D_QUERIED) {
    node->_manifold._flags &= ~OXB_MANIFOLD2D_QUERIED;
    
-   if(!oxb_solver2d_contact_sleeping(&node->_manifold, &world->_pool2d)) {
+   if(!oxb_solver2d_contact_sleeping(&node->_manifold, &world->_pool2d) || (node->_manifold._flags & OXB_MANIFOLD2D_SENSOR) == 0) {
     oxb_solver2d_contact_presolve(&node->_manifold, &world->_pool2d, &world->_input);
+    
     size_t current_color = node->_manifold._flags & OXB_MANIFOLD2D_COLOR;
     if(node->_manifold._flags & OXB_MANIFOLD2D_SOLO)
      current_color = 32;
@@ -178,7 +178,6 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   if(current_size > 0)
    oxb_solver2d_contact_solve_iterate(oxb_queue_front(current_group), 0, current_size, &world->_input);
  }
-
 
 
  if(reset_frame) {
@@ -253,14 +252,14 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   if(current_size > 0)
    oxb_solver2d_contact_solve_iterate(oxb_queue_front(current_group), 0, current_size, &world->_input);
  }
-
+ 
+ 
  }
  
  
  
  
  for(size_t iteration = 1; iteration < world->_substeps; iteration++) {
-
 
  for(size_t i = 0; i < world->_pool2d._containers[OXB_POOL2D_TYPE_JOINT_2D]._size; i++) {
   oxb_joint2d *joint = ((oxb_joint2d*)world->_pool2d._containers[OXB_POOL2D_TYPE_JOINT_2D]._bytes) + i;
@@ -300,7 +299,7 @@ oxb_noinline static void single_thread_pipeline(oxb_world2d *oxb_restrict const 
   if(current_size > 0)
    oxb_solver2d_contact_solve_iterate(oxb_queue_front(current_group), 0, current_size, &world->_input);
  }
-
+ 
  {
   /* dynamic integration */
   oxb_container *dynamic_container = &world->_pool2d._containers[OXB_POOL2D_TYPE_DYNAMIC_2D];
