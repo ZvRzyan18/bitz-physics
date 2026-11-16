@@ -1,5 +1,7 @@
 # version 0.1.2
 
+• filter sensor
+
 • refactor the main update function
 
 • fix prepare crash

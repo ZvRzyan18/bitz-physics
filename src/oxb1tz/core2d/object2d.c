@@ -217,9 +217,9 @@ void oxb_dynamic2d_updaterest(oxb_dynamic2d *oxb_restrict const body, void *w, c
    body->_resting_time += dt;
    if(body->_resting_time > world->_rest_time_threshold) {
     body->_flags |= OXB_FLAG_REST_2D;
-    velocity = oxb_vec2_mul(velocity, oxb_vec2_splat(0.3f));
-    body->_omega *= 0.3f;
     body->_resting_time = 0.0f;
+    velocity = oxb_vec2_mul(velocity, oxb_vec2_splat(0.3f * dt));
+    body->_omega *= 0.3f * dt;
    }
   } else {
    body->_resting_time = 0.0f;
@@ -230,7 +230,6 @@ void oxb_dynamic2d_updaterest(oxb_dynamic2d *oxb_restrict const body, void *w, c
    body->_flags &= ~OXB_FLAG_REST_2D;
    velocity = oxb_vec2_mul(velocity, oxb_vec2_splat(0.3f * dt));
    body->_omega *= 0.3f * dt;
-
   } 
  }
  oxb_vec2_store(body->_velocity._arr, velocity);
