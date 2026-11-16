@@ -96,7 +96,6 @@ static const float COSINE[3] = {
  */
  
 void oxb_sincos(const float theta, float *const oxb_restrict s, float *const oxb_restrict c) {
-
  uint16_t tx = (uint16_t)(uint32_t)(oxb_abs(theta) * 10430.378350f);
  int16_t ix = (int16_t)tx;
  uint8_t fp = (tx >= 0x3FFF) && (tx <= 0xBFFF);
