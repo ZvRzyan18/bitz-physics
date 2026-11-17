@@ -5,6 +5,7 @@
 #include "container.h"
 #include "pool.h"
 #include "memory.h"
+#include "test_math.h"
 
 
 #ifdef OXB_TEST
@@ -35,6 +36,10 @@ void oxb_test() {
  printf("<memory.h> test...\n");
  oxb_memory_test();
  printf("<memory.h> passed...\n\n");
+
+ printf("<math.h> test...\n");
+ oxb_math_test();
+ printf("<math.h> passed...\n\n");
 }
 
 #endif
