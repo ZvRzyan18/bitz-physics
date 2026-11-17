@@ -206,6 +206,9 @@ void oxb_dynamic2d_collider(oxb_collider2d *oxb_restrict const collider, const o
 
 
 void oxb_dynamic2d_updaterest(oxb_dynamic2d *oxb_restrict const body, void *w, const float dt) {
+ if(body->_flags & OXB_FLAG_SLEEP_2D)
+  return;
+ 
  oxb_world2d *world = (oxb_world2d*)w;
  /* resting state */
  const float vt = world->_linear_rest_threshold;
