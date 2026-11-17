@@ -1,5 +1,9 @@
 # version 0.1.2
 
+• disable rest update when sleeping
+
+• add math unit test
+
 • filter sensor
 
 • refactor the main update function
