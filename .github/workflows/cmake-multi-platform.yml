@@ -64,7 +64,7 @@ jobs:
           ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
             -I include \
             unit_tests/entry/main.c \
-            "$STATIC_LIB"
+            "$STATIC_LIB" \
             -o build/unit_tests/unit_tests
     # 4. Run unit tests
       - name: Run Unit Tests
