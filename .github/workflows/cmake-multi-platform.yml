@@ -55,7 +55,7 @@ jobs:
             -Iinclude -Isrc \
             unit_tests/*.c \
             unit_tests/entry/main.c \
-            liboxb1tz.a \
+            *.a build/*.a \
             -o build/unit_tests/unit_tests
 
     # 4. Run unit tests
