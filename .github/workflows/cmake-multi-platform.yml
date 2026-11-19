@@ -63,14 +63,14 @@ jobs:
            ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
             -I include -I src \
             unit_tests/*.c \
-            "$LIBRARY"
+            "$STATIC_LIB"
             -c
           
           ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
             -I include \
             *.o \
             unit_tests/entry/main.c \
-            "$LIBRARY"
+            "$STATIC_LIB"
             -o build/unit_tests/unit_tests
     # 4. Run unit tests
       - name: Run Unit Tests
