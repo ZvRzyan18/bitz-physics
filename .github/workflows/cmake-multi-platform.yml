@@ -58,16 +58,29 @@ jobs:
         run: |
           mkdir -p build/unit_tests
           if [[ "$RUNNER_OS" == "Windows" ]]; then
+          
            STATIC_LIB="build/oxb1tz.lib"
+           cl \
+           /nologo \
+           /I include \
+           /DOXB_TEST \
+           unit_tests/entry/main.c \
+           "$STATIC_LIB" \
+           /Febuild/unit_tests/unit_tests.exe
+           
           else
+          
            STATIC_LIB="build/liboxb1tz.a"
+           ${{ matrix.compiler }} \
+           -I include \
+           -DOXB_TEST \
+           unit_tests/entry/main.c \
+           "$STATIC_LIB" \
+           -lm \
+           -o build/unit_tests/unit_tests
+           
           fi
           
-          ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
-            -I include \
-            unit_tests/entry/main.c \
-            "$STATIC_LIB" -lm -DOXB_TEST \
-            -o build/unit_tests/unit_tests
     # 4. Run unit tests
       - name: Run Unit Tests
         shell: bash
