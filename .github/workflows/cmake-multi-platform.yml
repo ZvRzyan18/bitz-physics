@@ -61,8 +61,12 @@ jobs:
           fi
           
           ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
-            -Iinclude -Isrc \
+            -Iinclude -Isrc -c \
             unit_tests/*.c \
+            "$LIBRARY"
+            
+          ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
+            build/*.o \
             unit_tests/entry/main.c \
             "$LIBRARY"
             -o build/unit_tests/unit_tests
