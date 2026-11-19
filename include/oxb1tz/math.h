@@ -70,7 +70,7 @@ oxb_const oxb_inline float oxb_abs(const float x) {
  );
  return result;
 #else
- __f_floatbits f;
+ oxb_floatbits f;
  f.f = x;
  f.i &= 0x7FFFFFFF;
  return f.f;
@@ -217,7 +217,7 @@ oxb_inline float oxb_rsqrt(const float x) {
   : [in] "m" (x)
   : "xmm0"
  );
- return 1.0f / out;
+ return 1.0f / o;
 }
 
 oxb_inline float oxb_sqrt(const float x) {

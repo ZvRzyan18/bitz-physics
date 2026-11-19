@@ -4,6 +4,8 @@
 
 #ifdef OXB_TEST
 
+#define OXB_PI 3.14159265358979323846
+
 oxb_inline float VECTOR_TEST_RANDOM(float min, float max) {
  return min + ((float)rand() / (float)RAND_MAX) * (max - min);
 }
@@ -50,7 +52,7 @@ void oxb_math_test() {
  printf("--tan test\n");
  /* tan test */
  for(int i = 0; i < loop_repeat; i++) {
-  float tmp = VECTOR_TEST_RANDOM(-M_PI * 2.0f, M_PI * 2.0f);
+  float tmp = VECTOR_TEST_RANDOM(OXB_PI * -2.0f, OXB_PI * 2.0f);
   float ra = oxb_tan(tmp);
   float rb = tanf(tmp);
   if(isnan(ra) || isnan(rb) || isinf(ra) || isinf(rb))
@@ -88,7 +90,7 @@ void oxb_math_test() {
  printf("--atan2 test\n");
  /* atan2 test */
  for(int i = 0; i < 360; i++) {
-  float tmp = (float)i * (M_PI / 180.0f);
+  float tmp = (float)i * (OXB_PI / 180.0f);
   float ra = oxb_atan2(sinf(tmp), cosf(tmp));
   float rb = atan2f(sinf(tmp), cosf(tmp));
   assert(fabsf(ra - rb) < trig_epsilon);

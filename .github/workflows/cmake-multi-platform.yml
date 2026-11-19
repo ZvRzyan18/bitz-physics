@@ -1,0 +1,73 @@
+
+name: Multi-Platform Unit Tests
+
+on:
+  push:
+    branches: ["use-github-action"]
+  pull_request:
+    branches: ["use-github-action"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.os }} - ${{ matrix.compiler }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            compiler: gcc
+
+          - os: ubuntu-latest
+            compiler: clang
+
+          - os: windows-latest
+            compiler: cl
+
+          - os: macos-latest
+            compiler: clang
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+  # 1. Configure your existing CMake project
+      - name: Configure CMake
+        run: >
+          cmake -B build
+          -DCMAKE_C_COMPILER=${{ matrix.compiler }}
+          -DCMAKE_C_FLAGS="-DOXB_TEST -Wno-unused-variable -Wno-unused-but-set-variable"
+          -DCMAKE_BUILD_TYPE=Release
+          -S .
+
+  # 2. Build the static library
+      - name: Build Static Library
+        run: cmake --build build --config Release --parallel
+      - name: Find Static Library
+        shell: bash
+        run: |
+          find build -type f \( -name "*.a" -o -name "*.lib" \)
+    
+  # 3. Compile unit tests and link static library
+      - name: Compile Unit Tests
+        shell: bash
+        run: |
+          mkdir -p build/unit_tests
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+           STATIC_LIB="build/oxb1tz.lib"
+          else
+           STATIC_LIB="build/liboxb1tz.a"
+          fi
+          
+          ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
+            -I include \
+            unit_tests/entry/main.c \
+            "$STATIC_LIB" \
+            -o build/unit_tests/unit_tests
+    # 4. Run unit tests
+      - name: Run Unit Tests
+        shell: bash
+        run: ./build/unit_tests/unit_tests
+

@@ -113,7 +113,6 @@ oxb_hot static void oxb_mouse2d_solve(oxb_joint2d *oxb_restrict const joint, con
  void *obj;
  float inv_mass;
  float inv_inertia;
- oxb_vec2 rotation;
  oxb_vec2 position;
  oxb_vec2 velocity;
  float omega;
@@ -127,7 +126,6 @@ oxb_hot static void oxb_mouse2d_solve(oxb_joint2d *oxb_restrict const joint, con
    inv_mass = body->_inv_mass;
    inv_inertia = body->_inv_rotational_inertia;
 
-   rotation = oxb_vec2_load(body->_rotation._arr);
    position = oxb_vec2_load(body->_position._arr);
    velocity = oxb_vec2_load(body->_velocity._arr);
    omega = body->_omega;
