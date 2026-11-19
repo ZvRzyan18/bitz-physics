@@ -22,8 +22,8 @@ typedef struct {
 #define OXB_MASK2_INIT(a, b) ((uint32x2_t){a, b})
 #define OXB_MASK4_INIT(a, b, c, d) ((uint32x4_t){a, b, c, d})
 #else
-#define OXB_MASK2_INIT(a, b) ((oxb_mask4){a, b})
-#define OXB_MASK4_INIT(a, b, c, d) ((oxb_mask4){a, b, c, d})
+#define OXB_MASK2_INIT(a, b) ((oxb_mask4){{a, b}})
+#define OXB_MASK4_INIT(a, b, c, d) ((oxb_mask4){{a, b, c, d}})
 #endif
 
 /**********************************************
