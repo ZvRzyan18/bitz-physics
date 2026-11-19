@@ -50,7 +50,7 @@ void oxb_math_test() {
  printf("--tan test\n");
  /* tan test */
  for(int i = 0; i < loop_repeat; i++) {
-  float tmp = VECTOR_TEST_RANDOM(-M_PI * 2.0f, M_PI * 2.0f);
+  float tmp = VECTOR_TEST_RANDOM(M_PI * -2.0f, M_PI * 2.0f);
   float ra = oxb_tan(tmp);
   float rb = tanf(tmp);
   if(isnan(ra) || isnan(rb) || isinf(ra) || isinf(rb))
