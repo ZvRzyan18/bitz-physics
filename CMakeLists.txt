@@ -28,12 +28,12 @@ add_library(oxb1tz
 )
 
 if(MSVC)
-    target_compile_options(oxb1tz PRIVATE
-        $<$<COMPILE_LANGUAGE:C>:/DOXB_BUILD>
+	target_compile_options(oxb1tz PRIVATE
+	    $<$<COMPILE_LANGUAGE:C>:/DOXB_BUILD>
         $<$<COMPILE_LANGUAGE:C>:/W4>
-        $<$<COMPILE_LANGUAGE:C>:/WX>
+        $<$<COMPILE_LANGUAGE:C>:/WX->
         $<$<COMPILE_LANGUAGE:C>:/O2>
-    )
+	)
 else()
     target_compile_options(oxb1tz PRIVATE
         $<$<COMPILE_LANGUAGE:C>:-DOXB_BUILD>
