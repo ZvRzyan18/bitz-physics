@@ -145,7 +145,7 @@ void oxb_math_test() {
 
  /* non deterministic implementation (may vary depends on cpu) */
  printf("--rsqrt test\n");
- /* tanh test */
+ /* rsqrt test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(0.0f, max_range);
   float ra = oxb_rsqrt(tmp);
@@ -154,7 +154,7 @@ void oxb_math_test() {
  }
 
  printf("--sqrt test\n");
- /* tanh test */
+ /* sqrt test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(0.0f, max_range);
   float ra = oxb_sqrt(tmp);
