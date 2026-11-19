@@ -51,11 +51,11 @@ const manifold2d_contact_func oxb_manifold2d_object_vs_object[2][2] =
 
 oxb_inline oxb_const oxb_contact2d_id swap_contact(const oxb_contact2d_id a) {
  oxb_contact2d_id out;
- out._in_edge1 = a._in_edge2;
- out._in_edge2 = a._in_edge1;
+ out._bits._in_edge1 = a._bits._in_edge2;
+ out._bits._in_edge2 = a._bits._in_edge1;
 
- out._out_edge1 = a._out_edge2;
- out._out_edge2 = a._out_edge1;
+ out._bits._out_edge1 = a._bits._out_edge2;
+ out._bits._out_edge2 = a._bits._out_edge1;
  return out;
 }
 
@@ -179,12 +179,12 @@ static uint8_t obb_clip_edge(oxb_vec2 edge[2], const oxb_vec2 normal, const floa
   oxb_contact2d_id intersection_id;
   if (da > 0.0f) {
    intersection_id = ids[0];
-   intersection_id._in_edge1 = edge_id;
-   intersection_id._in_edge2 = ids[0]._in_edge2; 
+   intersection_id._bits._in_edge1 = edge_id;
+   intersection_id._bits._in_edge2 = ids[0]._bits._in_edge2; 
   } else {
    intersection_id = ids[1];
-   intersection_id._out_edge1 = edge_id;
-   intersection_id._out_edge2 = ids[1]._out_edge2;
+   intersection_id._bits._out_edge1 = edge_id;
+   intersection_id._bits._out_edge2 = ids[1]._bits._out_edge2;
   }
   out_ids[poly_size] = intersection_id;
   poly_size++;
@@ -326,11 +326,11 @@ bool oxb_manifold2d_box_vs_box(oxb_manifold2d *oxb_restrict const out, const oxb
  }
 
 
- ids[0]._in_edge1 = BOX_PERP_SIDE[tmp_ref_index][0];
- ids[0]._out_edge1 = tmp_ref_index;
+ ids[0]._bits._in_edge1 = BOX_PERP_SIDE[tmp_ref_index][0];
+ ids[0]._bits._out_edge1 = tmp_ref_index;
 
- ids[1]._in_edge1 = tmp_ref_index;
- ids[1]._out_edge1 = BOX_PERP_SIDE[tmp_ref_index][1];
+ ids[1]._bits._in_edge1 = tmp_ref_index;
+ ids[1]._bits._out_edge1 = BOX_PERP_SIDE[tmp_ref_index][1];
 
 
  float d0 = oxb_vec2_dot(ref_axis, oxb_vec3_low(inc_transform._basis[0]));
@@ -346,11 +346,11 @@ bool oxb_manifold2d_box_vs_box(oxb_manifold2d *oxb_restrict const out, const oxb
  uint8_t inc_edge_index = inc_index + (flip ? 2 : 0);
 
  
- ids[0]._in_edge2 = BOX_PERP_SIDE[inc_edge_index][0];
- ids[0]._out_edge2 = inc_edge_index;
+ ids[0]._bits._in_edge2 = BOX_PERP_SIDE[inc_edge_index][0];
+ ids[0]._bits._out_edge2 = inc_edge_index;
 
- ids[1]._in_edge2 = inc_edge_index;
- ids[1]._out_edge2 = BOX_PERP_SIDE[inc_edge_index][1];
+ ids[1]._bits._in_edge2 = inc_edge_index;
+ ids[1]._bits._out_edge2 = BOX_PERP_SIDE[inc_edge_index][1];
 
  oxb_vec2 edge[2];
  obb_get_inc_edge(inc_half_size, inc_transform, inc_edge_index, edge);
@@ -499,10 +499,10 @@ bool oxb_manifold2d_box_vs_circle(oxb_manifold2d *oxb_restrict const out, const 
 
   oxb_vec2_store(contact->_r1._arr, oxb_vec2_sub(edge[0], position_a));
   oxb_vec2_store(contact->_r2._arr, oxb_vec2_sub(edge[0], position_b));
-  contact->_id._in_edge1 = BOX_PERP_SIDE[facing_position][0];
-  contact->_id._out_edge1 = facing_position;
-  contact->_id._in_edge2 = 0xF;
-  contact->_id._out_edge2 = 0xF;
+  contact->_id._bits._in_edge1 = BOX_PERP_SIDE[facing_position][0];
+  contact->_id._bits._out_edge1 = facing_position;
+  contact->_id._bits._in_edge2 = 0xF;
+  contact->_id._bits._out_edge2 = 0xF;
   
   
   contact = out->_contacts + 1;
@@ -512,10 +512,10 @@ bool oxb_manifold2d_box_vs_circle(oxb_manifold2d *oxb_restrict const out, const 
 
   oxb_vec2_store(contact->_r1._arr, oxb_vec2_sub(edge[1], position_a));
   oxb_vec2_store(contact->_r2._arr, oxb_vec2_sub(edge[1], position_b));
-  contact->_id._in_edge1 = facing_position;
-  contact->_id._out_edge1 = BOX_PERP_SIDE[facing_position][1];
-  contact->_id._in_edge2 = 0xF;
-  contact->_id._out_edge2 = 0xF;
+  contact->_id._bits._in_edge1 = facing_position;
+  contact->_id._bits._out_edge1 = BOX_PERP_SIDE[facing_position][1];
+  contact->_id._bits._in_edge2 = 0xF;
+  contact->_id._bits._out_edge2 = 0xF;
 
   out->_contact_count = 2;
 
