@@ -41,7 +41,7 @@ jobs:
           cmake -B build
           -DCMAKE_C_COMPILER=${{ matrix.compiler }}
           -DCMAKE_C_FLAGS="-DOXB_TEST"
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_BUILD_TYPE=Debug
           -S .
 
   # 2. Build the static library
