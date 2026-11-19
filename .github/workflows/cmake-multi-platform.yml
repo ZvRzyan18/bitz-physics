@@ -3,9 +3,9 @@ name: Multi-Platform Unit Tests
 
 on:
   push:
-    branches: ["main"]
+    branches: ["use-github-action"]
   pull_request:
-    branches: ["main"]
+    branches: ["use-github-action"]
   workflow_dispatch:
 
 jobs:
