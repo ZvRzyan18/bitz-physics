@@ -37,8 +37,9 @@ jobs:
 
   # 1. Configure your existing CMake project
       - name: Configure CMake
+        shell: bash
         run: |
-         if [[ "$RUNNER_OS" == "Windows" ]]; then
+         if [[ "${{ matrix.compiler }}" == "cl" ]]; then
           cmake -B build -S . \
           -DCMAKE_C_COMPILER=cl \
           -DCMAKE_C_FLAGS="/DOXB_TEST" \
@@ -62,7 +63,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p build/unit_tests
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
+          if [[ "${{ matrix.compiler }}" == "cl" ]]; then
           
            STATIC_LIB="build/oxb1tz.lib"
            cl \
