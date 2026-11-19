@@ -70,7 +70,7 @@ oxb_const oxb_inline float oxb_abs(const float x) {
  );
  return result;
 #else
- __f_floatbits f;
+ oxb_floatbits f;
  f.f = x;
  f.i &= 0x7FFFFFFF;
  return f.f;
