@@ -60,9 +60,15 @@ jobs:
            STATIC_LIB="build/liboxb1tz.a"
           fi
           
+           ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
+            -I include -I src \
+            unit_tests/*.c \
+            "$LIBRARY"
+            -c
+          
           ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
             -I include \
-            CMakeFiles/oxb1tz.dir/unit_tests/*.o \
+            *.o \
             unit_tests/entry/main.c \
             "$LIBRARY"
             -o build/unit_tests/unit_tests
