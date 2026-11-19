@@ -44,10 +44,10 @@ jobs:
   # 2. Build the static library
       - name: Build Static Library
         run: cmake --build build --config Release --parallel
-      - name: Find Static Library And Object Files
+      - name: Find Static Library
         shell: bash
         run: |
-          find build -type f \( -name "*.o" -o -name "*.a" -o -name "*.lib" \)
+          find build -type f \(-name "*.a" -o -name "*.lib" \)
     
   # 3. Compile unit tests and link static library
       - name: Compile Unit Tests
@@ -64,13 +64,17 @@ jobs:
             -Iinclude -Isrc -c \
             unit_tests/*.c \
             "$LIBRARY"
-            
+    
           ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
             build/*.o \
             unit_tests/entry/main.c \
             "$LIBRARY"
             -o build/unit_tests/unit_tests
-
+      - name: Find Object Files
+        shell: bash
+        run: |
+          find build -type f \( -name "*.o" \)
+            
     # 4. Run unit tests
       - name: Run Unit Tests
         shell: bash
