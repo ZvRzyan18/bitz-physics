@@ -228,7 +228,7 @@ oxb_inline float oxb_rsqrt(const float x) {
   : [in] "m" (x)
   : "xmm0"
  );
- return 1.0f / out;
+ return 1.0f / o;
 }
 
 oxb_inline float oxb_sqrt(const float x) {
