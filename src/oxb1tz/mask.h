@@ -84,7 +84,12 @@ oxb_inline oxb_mask2 oxb_mask2_fromvec2(const oxb_vec2 x) {
 #ifdef OXB_NEON
  return vreinterpret_u32_f32(x);
 #else
- return *((oxb_mask2*)&x);
+ union {
+  oxb_mask2 m;
+  oxb_vec2 v;
+ } bits;
+ bits.v = x;
+ return bits.m;
 #endif
 }
 
@@ -276,7 +281,12 @@ oxb_inline oxb_vec4 oxb_mask4_tovec4(const oxb_mask4 x) {
 #ifdef OXB_NEON
  return vreinterpretq_f32_u32(x);
 #else
- return *((oxb_vec4*)&x);
+ union {
+  oxb_mask4 m;
+  oxb_vec4 v;
+ } bits;
+ bits.v = x;
+ return bits.m;
 #endif
 }
 
