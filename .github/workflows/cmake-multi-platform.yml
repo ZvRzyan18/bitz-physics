@@ -54,12 +54,17 @@ jobs:
         shell: bash
         run: |
           mkdir -p build/unit_tests
-
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+           STATIC_LIB="build/oxb1tz.lib"
+          else
+           STATIC_LIB="build/liboxb1tz.a"
+          fi
+          
           ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
             -Iinclude -Isrc \
             unit_tests/*.c \
             unit_tests/entry/main.c \
-            build/*.a build/*.lib
+            "$LIBRARY"
             -o build/unit_tests/unit_tests
 
     # 4. Run unit tests
