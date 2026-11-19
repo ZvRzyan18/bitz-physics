@@ -47,7 +47,7 @@ jobs:
       - name: Find Static Library
         shell: bash
         run: |
-          find build -type f \(-name "*.a" -o -name "*.lib" \)
+          find build -type f \( -name "*.a" -o -name "*.lib" \)
     
   # 3. Compile unit tests and link static library
       - name: Compile Unit Tests
@@ -70,11 +70,6 @@ jobs:
             unit_tests/entry/main.c \
             "$LIBRARY"
             -o build/unit_tests/unit_tests
-      - name: Find Object Files
-        shell: bash
-        run: |
-          find build -type f \( -name "*.o" \)
-            
     # 4. Run unit tests
       - name: Run Unit Tests
         shell: bash
