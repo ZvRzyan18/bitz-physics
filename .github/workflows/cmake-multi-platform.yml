@@ -40,7 +40,7 @@ jobs:
         run: >
           cmake -B build
           -DCMAKE_C_COMPILER=${{ matrix.compiler }}
-          -DCMAKE_C_FLAGS="-DOXB_TEST -Wno-unused-variable -Wno-unused-but-set-variable"
+          -DCMAKE_C_FLAGS="-DOXB_TEST"
           -DCMAKE_BUILD_TYPE=Release
           -S .
 
