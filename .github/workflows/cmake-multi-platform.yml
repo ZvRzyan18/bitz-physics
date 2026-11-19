@@ -61,12 +61,7 @@ jobs:
           fi
           
           ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
-            -Iinclude -Isrc -c \
-            unit_tests/*.c \
-            "$LIBRARY"
-    
-          ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
-            build/*.o \
+            CMakeFiles/oxb1tz.dir/unit_tests/*.o \
             unit_tests/entry/main.c \
             "$LIBRARY"
             -o build/unit_tests/unit_tests
