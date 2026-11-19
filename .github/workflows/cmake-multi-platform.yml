@@ -61,6 +61,7 @@ jobs:
           fi
           
           ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
+            -I include \
             CMakeFiles/oxb1tz.dir/unit_tests/*.o \
             unit_tests/entry/main.c \
             "$LIBRARY"
