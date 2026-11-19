@@ -55,7 +55,8 @@ jobs:
             -Iinclude -Isrc \
             unit_tests/*.c \
             unit_tests/entry/main.c \
-            *.a build/*.a \
+            *.a build/*.a build/unit_tests/*.a \
+            *.lib build/*.lib build/unit_tests/*.lib \
             -o build/unit_tests/unit_tests
 
     # 4. Run unit tests
