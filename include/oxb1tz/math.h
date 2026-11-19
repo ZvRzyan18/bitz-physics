@@ -196,16 +196,6 @@ oxb_inline float oxb_rsqrt(const float x) {
 }
 
 oxb_inline float oxb_sqrt(const float x) {
-#ifdef __FAST_MATH__
- /* my device has ≈0.2% max error */
- float o;
- __asm__(
-  "frsqrte %s0, %s1"
-  : "=w"(o)
-  : "w"(x)
- );
- return x * o;
-#else
  float o;
  __asm__ volatile (
   "fsqrt %s0, %s1\n"
@@ -213,7 +203,6 @@ oxb_inline float oxb_sqrt(const float x) {
   : "w" (x)
  );
  return o;
-#endif
 }
 
 #elif defined(__x86_64__)
