@@ -183,6 +183,11 @@ oxb_inline float oxb_rsqrt(const float x) {
   "fmul    %s1, %s0, %s0 \n"
   "frsqrts %s2, %s3, %s1 \n"
   "fmul    %s0, %s0, %s2 \n"
+
+  "fmul    %s1, %s0, %s0 \n"
+  "frsqrts %s2, %s3, %s1 \n"
+  "fmul    %s0, %s0, %s2 \n"
+  
   : "=&w"(mx), "=&w"(mm), "=&w"(l)
   : "w"(x)
  );
@@ -191,6 +196,16 @@ oxb_inline float oxb_rsqrt(const float x) {
 }
 
 oxb_inline float oxb_sqrt(const float x) {
+#ifdef __FAST_MATH__
+ /* my device has ≈0.2% max error */
+ float o;
+ __asm__(
+  "frsqrte %s0, %s1"
+  : "=w"(o)
+  : "w"(x)
+ );
+ return x * o;
+#else
  float o;
  __asm__ volatile (
   "fsqrt %s0, %s1\n"
@@ -198,6 +213,7 @@ oxb_inline float oxb_sqrt(const float x) {
   : "w" (x)
  );
  return o;
+#endif
 }
 
 #elif defined(__x86_64__)
@@ -249,6 +265,7 @@ oxb_inline float oxb_rsqrt(const float x) {
  f =        mx;
 #ifndef __FAST_MATH__
  f =        (f * (1.5f - (x_half * f * f)));
+ f =        (f * (1.5f - (x_half * f * f)));
 #endif
  return f;
 }
@@ -263,6 +280,7 @@ oxb_inline float oxb_sqrt(const float x) {
  x_half =   x * 0.5f;
  f =        mx;
 #ifndef __FAST_MATH__
+ f =        (f * (1.5f - (x_half * f * f)));
  f =        (f * (1.5f - (x_half * f * f)));
 #endif
  return x * f;
