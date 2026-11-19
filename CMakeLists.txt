@@ -28,7 +28,7 @@ add_library(oxb1tz
 )
 
 target_compile_options(oxb1tz PRIVATE
- $<$<COMPILE_LANGUAGE:C>: -ffast-math -DOXB_BUILD -Wall -Wextra -Werror -O3 -std=c11>
+ $<$<COMPILE_LANGUAGE:C>: -DOXB_BUILD -Wall -Wextra -Werror -O3 -std=c11>
 # $<$<COMPILE_LANGUAGE:C>: -ffast-math -DOXB_BUILD -O0>
 )
 
