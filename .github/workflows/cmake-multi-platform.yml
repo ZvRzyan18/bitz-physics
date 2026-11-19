@@ -52,7 +52,7 @@ jobs:
           mkdir -p build/unit_tests
 
           ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
-            -Iinclude \
+            -Iinclude -Isrc \
             unit_tests/*.c \
             unit_tests/entry/main.c \
             liboxb1tz.a \
