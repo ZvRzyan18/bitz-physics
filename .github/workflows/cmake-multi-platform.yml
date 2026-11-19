@@ -42,7 +42,7 @@ jobs:
          if [[ "${{ matrix.compiler }}" == "cl" ]]; then
           cmake -B build -S . \
           -DCMAKE_C_COMPILER=cl \
-          -DCMAKE_C_FLAGS="/DOXB_TEST" \
+          -DOXB_TEST=ON \
           -DCMAKE_BUILD_TYPE=Debug
          else
           cmake -B build -S . \
