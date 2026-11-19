@@ -117,13 +117,12 @@ oxb_inline float oxb_round(const float x) {
  int a = (int)(x + (x >= 0.0f ? 0.5f : -0.5f));
  return (float)a;
 }
-
 /*
  every fractional digits, rounds up towards positive infinity
 */
 oxb_inline float oxb_ceil(const float x) {
  int i = (int)x;
- return (float)(x > 0 && x != (float)i) ? i + 1 : i;
+ return (float)((x > 0.0f && x != (float)i) ? i + 1 : i);
 }
 
 /*
@@ -131,7 +130,7 @@ oxb_inline float oxb_ceil(const float x) {
 */
 oxb_inline float oxb_floor(const float x) {
  int i = (int)x;
- return (float)(x < 0 && x != (float)i) ? i - 1 : i;
+ return (float)((x < 0.0f && x != (float)i) ? i - 1 : i);
 }
 
 oxb_const uint32_t oxb_hash(uint32_t a);
