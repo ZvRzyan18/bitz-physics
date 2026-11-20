@@ -1,5 +1,7 @@
 # version 0.1.2
 
+• use github actions
+
 • disable rest update when sleeping
 
 • add math unit test
