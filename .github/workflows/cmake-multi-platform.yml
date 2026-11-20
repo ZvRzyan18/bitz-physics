@@ -45,7 +45,7 @@ jobs:
         shell: bash
         run: |
          if [[ "${{ matrix.compiler }}" == "cl" ]]; then
-          cmake -B build -S . \
+          MSYS_NO_PATHCONV=1 cmake -B build -S . \
           -DCMAKE_C_COMPILER=cl \
           -DCMAKE_C_FLAGS="/DOXB_TEST" \
           -DCMAKE_BUILD_TYPE=Debug
