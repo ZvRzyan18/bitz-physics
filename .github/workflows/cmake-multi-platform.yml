@@ -37,13 +37,19 @@ jobs:
 
   # 1. Configure your existing CMake project
       - name: Configure CMake
-        run: >
-          cmake -B build
-          -DCMAKE_C_COMPILER=${{ matrix.compiler }}
-          -DCMAKE_C_FLAGS="-DOXB_TEST -Wno-unused-variable -Wno-unused-but-set-variable"
-          -DCMAKE_BUILD_TYPE=Release
-          -S .
-
+        shell: bash
+        run: |
+         if [[ "${{ matrix.compiler }}" == "cl" ]]; then
+          cmake -B build -S . \
+          -DCMAKE_C_COMPILER=cl \
+          -DOXB_TEST=ON \
+          -DCMAKE_BUILD_TYPE=Debug
+         else
+          cmake -B build -S . \
+          -DCMAKE_C_COMPILER=${{ matrix.compiler }} \
+          -DCMAKE_C_FLAGS="-DOXB_TEST" \
+          -DCMAKE_BUILD_TYPE=Debug
+         fi
   # 2. Build the static library
       - name: Build Static Library
         run: cmake --build build --config Release --parallel
@@ -57,17 +63,30 @@ jobs:
         shell: bash
         run: |
           mkdir -p build/unit_tests
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
+          if [[ "${{ matrix.compiler }}" == "cl" ]]; then
+          
            STATIC_LIB="build/oxb1tz.lib"
+           cl \
+           /nologo \
+           /I include \
+           /DOXB_TEST \
+           unit_tests/entry/main.c \
+           "$STATIC_LIB" \
+           /Febuild/unit_tests/unit_tests.exe
+           
           else
+          
            STATIC_LIB="build/liboxb1tz.a"
+           ${{ matrix.compiler }} \
+           -I include \
+           -DOXB_TEST \
+           unit_tests/entry/main.c \
+           "$STATIC_LIB" \
+           -lm \
+           -o build/unit_tests/unit_tests
+           
           fi
           
-          ${{ matrix.compiler == 'cl' && 'gcc' || matrix.compiler }} \
-            -I include \
-            unit_tests/entry/main.c \
-            "$STATIC_LIB" \
-            -o build/unit_tests/unit_tests
     # 4. Run unit tests
       - name: Run Unit Tests
         shell: bash

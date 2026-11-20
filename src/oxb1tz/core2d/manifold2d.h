@@ -22,7 +22,7 @@ typedef union {
   unsigned char _out_edge1 : 4;
   unsigned char _in_edge2  : 4;
   unsigned char _out_edge2 : 4;
- };
+ } _bits;
  uint16_t _value;
 } oxb_contact2d_id;
 

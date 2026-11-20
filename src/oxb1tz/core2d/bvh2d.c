@@ -921,7 +921,7 @@ void oxb_bvh2d_traversepairs(oxb_bvh2d *oxb_restrict const bvh, void (*func)(oxb
 
  float tolerance_factor = 2.5f;
  float log_n = oxb_log2((float)bvh->_leaf_size);
- uint32_t max_depth = oxb_round(tolerance_factor * log_n);
+ uint32_t max_depth = (uint32_t)oxb_round(tolerance_factor * log_n);
  
  int ca = tree_info._max_depth > max_depth;
  int cb = tree_info._node_visits > (bvh->_leaf_size * 20u);
@@ -943,7 +943,7 @@ void oxb_bvh2d_traversebody(oxb_bvh2d *oxb_restrict const bvh, void (*func)(oxb_
  if(!bvh->_checked) {
   float tolerance_factor = 2.5f;
   float log_n = oxb_log2((float)bvh->_leaf_size);
-  uint32_t max_depth = oxb_round(tolerance_factor * log_n);
+  uint32_t max_depth = (uint32_t)oxb_round(tolerance_factor * log_n);
  
   int ca = tree_info._max_depth > max_depth;
   int cb = tree_info._node_visits > (bvh->_leaf_size * 20u);
@@ -978,7 +978,7 @@ void oxb_bvh2d_mediansplit(oxb_bvh2d *oxb_restrict const bvh, oxb_pool2d *oxb_re
  if(total_size == 0)
   return;
  
- size_t offset = oxb_bump_acquire(&bvh->_bump, sizeof(oxb_pool_id) * total_size, bvh->_pool._allocator->_alignment);
+ size_t offset = oxb_bump_acquire(&bvh->_bump, sizeof(oxb_pool_id) * total_size, (uint8_t)bvh->_pool._allocator->_alignment);
  oxb_pool_id *leafs = oxb_bump_get(&bvh->_bump, offset);
  
  size_t current_offset = 0;
@@ -1016,7 +1016,7 @@ oxb_handle oxb_bvh2d_querypoint(oxb_bvh2d *oxb_restrict const bvh, oxb_pool2d *o
  if(!bvh->_checked) {
   float tolerance_factor = 2.5f;
   float log_n = oxb_log2((float)bvh->_leaf_size);
-  uint32_t max_depth = oxb_round(tolerance_factor * log_n);
+  uint32_t max_depth = (uint32_t)oxb_round(tolerance_factor * log_n);
  
   int ca = tree_info._max_depth > max_depth;
   int cb = tree_info._node_visits > (bvh->_leaf_size * 20u);

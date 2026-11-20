@@ -27,8 +27,21 @@ add_library(oxb1tz
  ${SRCS}
 )
 
-target_compile_options(oxb1tz PRIVATE
- $<$<COMPILE_LANGUAGE:C>: -ffast-math -DOXB_BUILD -Wall -Wextra -Werror -O3 -std=c11>
-# $<$<COMPILE_LANGUAGE:C>: -ffast-math -DOXB_BUILD -O0>
-)
+if(MSVC)
+	target_compile_options(oxb1tz PRIVATE
+	    $<$<COMPILE_LANGUAGE:C>:/DOXB_BUILD>
+        $<$<COMPILE_LANGUAGE:C>:/W4>
+        $<$<COMPILE_LANGUAGE:C>:/WX->
+        $<$<COMPILE_LANGUAGE:C>:/O2>
+	)
+else()
+    target_compile_options(oxb1tz PRIVATE
+        $<$<COMPILE_LANGUAGE:C>:-DOXB_BUILD>
+        $<$<COMPILE_LANGUAGE:C>:-Wall>
+        $<$<COMPILE_LANGUAGE:C>:-Wextra>
+        $<$<COMPILE_LANGUAGE:C>:-Werror>
+        $<$<COMPILE_LANGUAGE:C>:-O3>
+        $<$<COMPILE_LANGUAGE:C>:-std=c11>
+    )
+endif()
 

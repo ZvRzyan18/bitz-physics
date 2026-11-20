@@ -39,7 +39,7 @@
 
 #define oxb_likely(x) (x)
 #define oxb_unlikely(x) (x)
-#define oxb_inline __forceinline static inline 
+#define oxb_inline __forceinline static 
 #define oxb_noinline __declspec(noinline)
 #define oxb_unreachable() __assume(0)
 #define oxb_const 

@@ -4,7 +4,7 @@
 
 #ifdef OXB_TEST
 
-#define OXB_PI 3.14159265358979323846
+#define OXB_PI 3.141592f
 
 oxb_inline float VECTOR_TEST_RANDOM(float min, float max) {
  return min + ((float)rand() / (float)RAND_MAX) * (max - min);
