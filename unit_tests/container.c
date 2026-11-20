@@ -129,7 +129,7 @@ void oxb_container_test() {
  alloc._alignment = 16;
  
  oxb_container test;
- oxb_container_create(&test, &alloc, sizeof(int), 1);
+ oxb_container_create(&test, &alloc, sizeof(int), 50);
  printf("--acquire test\n");
  oxb_container_id ids[100];
  for(int i = 0; i < 100; i++) {
