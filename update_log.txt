@@ -1,5 +1,11 @@
 # version 0.1.2
 
+• make initializer more portable
+
+• use fflush to print display the print result ASAP
+
+• improve compiler portability
+
 • use github actions
 
 • disable rest update when sleeping
