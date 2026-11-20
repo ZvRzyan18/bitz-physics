@@ -77,8 +77,8 @@ oxb_hot static void oxb_mouse2d_presolve(oxb_joint2d *oxb_restrict const joint, 
   float k12 = -inv_inertia * oxb_vec2_getx(r) * oxb_vec2_gety(r);
   float k22 = oxb_fma((inv_inertia * oxb_vec2_getx(r)), oxb_vec2_getx(r), inv_mass);
   oxb_mat2x2 mass_matrix;
-  mass_matrix._basis[0] = OXB_VEC2_INIT(k11, k12);
-  mass_matrix._basis[1] = OXB_VEC2_INIT(k12, k22);
+  mass_matrix._basis[0] = (oxb_vec2)OXB_VEC2_INIT(k11, k12);
+  mass_matrix._basis[1] = (oxb_vec2)OXB_VEC2_INIT(k12, k22);
   oxb_mat2x2_store(joint->_type._mouse._inv_mass, oxb_mat2x2_inv(mass_matrix));
  }
  
@@ -137,8 +137,8 @@ oxb_hot static void oxb_mouse2d_solve(oxb_joint2d *oxb_restrict const joint, con
  }
 
  oxb_mat2x2 mass_coeff;
- mass_coeff._basis[0] = OXB_VEC2_INIT(input->_mass_coeff, 0.0f);
- mass_coeff._basis[1] = OXB_VEC2_INIT(0.0f, input->_mass_coeff);
+ mass_coeff._basis[0] = (oxb_vec2)OXB_VEC2_INIT(input->_mass_coeff, 0.0f);
+ mass_coeff._basis[1] = (oxb_vec2)OXB_VEC2_INIT(0.0f, input->_mass_coeff);
 
  oxb_mat2x2 mass_matrix = oxb_mat2x2_load(joint->_type._mouse._inv_mass);
 
