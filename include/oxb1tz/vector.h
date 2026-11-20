@@ -524,7 +524,11 @@ static const uint32_t perm_tbl[4] = {
  return vreinterpretq_f32_u8(result);
 #endif
 #else
- return OXB_VEC3_INIT(oxb_vec3_get(x, a), oxb_vec3_get(x, b), oxb_vec3_get(x, c));
+ oxb_vec3 out;
+ out._arr[0] = oxb_vec3_get(x, a);
+ out._arr[1] = oxb_vec3_get(x, b);
+ out._arr[2] = oxb_vec3_get(x, c);
+ return out;
 #endif
 }
 
@@ -922,7 +926,12 @@ static const uint32_t perm_tbl[4] = {
  return vreinterpretq_f32_u8(result);
 #endif
 #else
- return OXB_VEC4_INIT(oxb_vec4_get(x, a), oxb_vec4_get(x, b), oxb_vec4_get(x, c), oxb_vec4_get(x, d));
+ oxb_vec4 out;
+ out._arr[0] = oxb_vec4_get(x, a);
+ out._arr[1] = oxb_vec4_get(x, b);
+ out._arr[2] = oxb_vec4_get(x, c);
+ out._arr[3] = oxb_vec4_get(x, d);
+ return out;
 #endif
 }
 
