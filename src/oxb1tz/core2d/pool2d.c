@@ -35,7 +35,7 @@ oxb_handle oxb_pool2d_acquire(oxb_pool2d *oxb_restrict const pool, const oxb_obj
  assert(pool_index < 5);
  oxb_container_id container_id = oxb_container_acquire(&pool->_containers[pool_index]);
  oxb_handle handle;
- handle._type = pool_index;
+ handle._type = (uint8_t)pool_index;
  handle._id = container_id._val;
  
  oxb_world2d *world = (oxb_world2d*)pool->_world;
