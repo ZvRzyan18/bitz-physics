@@ -73,6 +73,7 @@ jobs:
            STATIC_LIB="build/Release/oxb1tz.lib"
            MSYS_NO_PATHCONV=1 ${{ matrix.compiler }} \
            /nologo \
+           /MDd \
            /I"$GITHUB_WORKSPACE/include" \
            /DOXB_TEST \
            unit_tests/entry/main.c \
