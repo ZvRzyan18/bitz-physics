@@ -98,7 +98,11 @@ jobs:
         shell: bash
         run: | 
          if [[ "${{ matrix.compiler }}" == "cl" ]]; then
+          echo "-->> WINDOWS UNIT TESTS"
+          date
           ./build/unit_tests/unit_tests.exe
+          echo "-->> WINDOWS UNIT TESTS"
+          date
          else
           ./build/unit_tests/unit_tests
          fi
