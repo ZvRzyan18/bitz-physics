@@ -140,7 +140,7 @@ void oxb_container_test() {
  alloc._alignment = 16;
  
  oxb_container test;
- oxb_container_create(&test, &alloc, sizeof(int), 50);
+ oxb_container_create(&test, &alloc, sizeof(int), 2);
  printf("--acquire test\n");
  fflush(stdout);
  
