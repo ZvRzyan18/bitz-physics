@@ -90,7 +90,7 @@ oxb_pool_id oxb_pool_acquire(oxb_pool *oxb_restrict const pool) {
    resize(pool);
   pool->_size++;
   oxb_pool_id id;
-  id._val = pool->_forward_index++;
+  id._val = (oxb_id)pool->_forward_index++;
   return id;
  }
  oxb_unreachable();

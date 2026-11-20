@@ -23,7 +23,7 @@ static void resize(oxb_queue *oxb_restrict const c) {
 void oxb_queue_create(oxb_queue *oxb_restrict const c, oxb_allocator *oxb_restrict const alloc, const uint16_t stride, const size_t reserve) {
  assert(reserve != 0);
  c->_allocator = alloc;
- c->_max_size = oxb_nextp2(reserve);
+ c->_max_size = oxb_nextp2((uint32_t)reserve);
  c->_size = 0;
  c->_front = 0;
  c->_stride = stride;

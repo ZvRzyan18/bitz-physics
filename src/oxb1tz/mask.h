@@ -19,17 +19,12 @@ typedef struct {
 #endif
 
 #ifdef OXB_NEON
-#define OXB_MASK2_INIT(a, b) ((uint32x2_t){a, b})
-#define OXB_MASK4_INIT(a, b, c, d) ((uint32x4_t){a, b, c, d})
+#define OXB_MASK2_INIT(a, b) {a, b}
+#define OXB_MASK4_INIT(a, b, c, d) {a, b, c, d}
 #else
 
-#if defined(_MSC_VER)
 #define OXB_MASK2_INIT(a, b) {{a, b}}
 #define OXB_MASK4_INIT(a, b, c, d) {{a, b, c, d}}
-#else
-#define OXB_MASK2_INIT(a, b) ((oxb_mask2){{a, b}})
-#define OXB_MASK4_INIT(a, b, c, d) ((oxb_mask4){{a, b, c, d}})
-#endif
 
 #endif
 

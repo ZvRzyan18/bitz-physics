@@ -24,7 +24,7 @@ oxb_const uint32_t oxb_hash(uint32_t a) {
 /*
  next multiple of
 */
-oxb_const uintptr_t oxb_alignto(const uintptr_t x, const uint8_t alignment) {
+oxb_const uintptr_t oxb_alignto(const uintptr_t x, const size_t alignment) {
  return (x + (uintptr_t)alignment - 1) & ~((uintptr_t)alignment - 1);
 }
 
@@ -114,7 +114,7 @@ void oxb_sincos(const float theta, float *const oxb_restrict s, float *const oxb
 
 oxb_pure float oxb_sin(const float theta) { 
  uint16_t tx = 0x3FFF - (uint16_t)(uint32_t)(theta * 10430.378350f);
- int16_t ix = tx;
+ int16_t ix = (int16_t)tx;
  uint8_t fp = (tx >= 0x3FFF) && (tx <= 0xBFFF);
  ix = fp ? 0x7FFF - ix : ix;
  float t = ((float)ix);
@@ -127,7 +127,7 @@ oxb_pure float oxb_sin(const float theta) {
 
 oxb_pure float oxb_cos(const float theta) { 
  uint16_t tx = (uint16_t)(uint32_t)(theta * 10430.378350f);
- int16_t ix = tx;
+ int16_t ix = (int16_t)tx;
  uint8_t fp = (tx >= 0x3FFF) && (tx <= 0xBFFF);
  ix = fp ? 0x7FFF - ix : ix;
  float t = ((float)ix);
@@ -498,7 +498,7 @@ oxb_pure float oxb_exp2(const float x) {
   return oxb_fma(oxb_fma(oxb_fma(oxb_fma(EXP2[0], a, EXP2[1]), a, EXP2[2]), a, EXP2[3]), a, EXP2[4]);
  }
 	a = x;
- whole = (float)(a - 0.5f);
+ whole = (int32_t)(float)(a - 0.5f);
  a = a - ((float)whole);
  bits.i = (uint32_t)((int32_t)(127 + whole) << 23);
  mx = oxb_fma(oxb_fma(oxb_fma(oxb_fma(EXP2[0], a, EXP2[1]), a, EXP2[2]), a, EXP2[3]), a, EXP2[4]);

@@ -13,7 +13,7 @@ typedef struct {
 
 void oxb_bump_create(oxb_bump *oxb_restrict const bump, oxb_allocator *oxb_restrict const alloc, const size_t reserve);
 void oxb_bump_destroy(oxb_bump *oxb_restrict const bump);
-size_t oxb_bump_acquire(oxb_bump *oxb_restrict const bump, const size_t size, const uint8_t alignment);
+size_t oxb_bump_acquire(oxb_bump *oxb_restrict const bump, const size_t size, const size_t alignment);
 void oxb_bump_point(oxb_bump *oxb_restrict const bump, const size_t offset);
 
 oxb_inline void* oxb_bump_get(oxb_bump *oxb_restrict const bump, size_t offset) {
