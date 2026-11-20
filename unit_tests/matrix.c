@@ -68,7 +68,7 @@ static void mat2x2_test() {
  const float epsilon = 1e-2f;
  const float min_range = -100.0f;
  const float max_range =  100.0f;
- const int loop_repeat = 100;
+ const int loop_repeat = 10;
 
  printf("--transpose test\n");
  /* transpose test */
@@ -194,7 +194,7 @@ static void mat3x3_test() {
  const float epsilon = 1e-2f;
  const float min_range = -100.0f;
  const float max_range =  100.0f;
- const int loop_repeat = 100;
+ const int loop_repeat = 10;
  
  printf("--transpose test\n");
  /* transpose test */

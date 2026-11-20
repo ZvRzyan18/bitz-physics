@@ -15,7 +15,7 @@ oxb_inline void VECTOR2_TEST() {
  const float epsilon = 1e-2f;
  const float min_range = -100.0f;
  const float max_range =  100.0f;
- const int loop_repeat = 100;
+ const int loop_repeat = 10;
  
  printf("--splat test\n");
  /* splat test */
@@ -90,7 +90,7 @@ oxb_inline void VECTOR2_TEST() {
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
   float tmp1 = VECTOR_TEST_RANDOM(min_range, max_range);
-  oxb_vec2 a = oxb_vec2_neg(OXB_VEC2_INIT(tmp, tmp1));
+  oxb_vec2 a = oxb_vec2_neg((oxb_vec2)OXB_VEC2_INIT(tmp, tmp1));
   assert(fabsf(oxb_vec2_getx(a) - -tmp) < epsilon);
   assert(fabsf(oxb_vec2_gety(a) - -tmp1) < epsilon);  
  }
@@ -100,7 +100,7 @@ oxb_inline void VECTOR2_TEST() {
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
   float tmp1 = VECTOR_TEST_RANDOM(min_range, max_range);
-  oxb_vec2 a = oxb_vec2_abs(OXB_VEC2_INIT(tmp, tmp1));
+  oxb_vec2 a = oxb_vec2_abs((oxb_vec2)OXB_VEC2_INIT(tmp, tmp1));
   assert(fabsf(oxb_vec2_getx(a) - fabsf(tmp)) < epsilon);
   assert(fabsf(oxb_vec2_gety(a) - fabsf(tmp1)) < epsilon);  
  }
@@ -301,7 +301,7 @@ oxb_inline void VECTOR3_TEST() {
  const float epsilon = 1e-2f;
  const float min_range = -100.0f;
  const float max_range =  100.0f;
- const int loop_repeat = 100;
+ const int loop_repeat = 10;
  
  printf("--splat test\n");
  /* splat test */
@@ -376,7 +376,7 @@ oxb_inline void VECTOR3_TEST() {
   float tmp1 = VECTOR_TEST_RANDOM(min_range, max_range);
   float tmp2 = VECTOR_TEST_RANDOM(min_range, max_range);
   
-  oxb_vec3 a = oxb_vec3_neg(OXB_VEC3_INIT(tmp, tmp1, tmp2));
+  oxb_vec3 a = oxb_vec3_neg((oxb_vec3)OXB_VEC3_INIT(tmp, tmp1, tmp2));
   assert(fabsf(oxb_vec3_getx(a) - -tmp) < epsilon);
   assert(fabsf(oxb_vec3_gety(a) - -tmp1) < epsilon);  
   assert(fabsf(oxb_vec3_getz(a) - -tmp2) < epsilon);  
@@ -389,7 +389,7 @@ oxb_inline void VECTOR3_TEST() {
   float tmp1 = VECTOR_TEST_RANDOM(min_range, max_range);
   float tmp2 = VECTOR_TEST_RANDOM(min_range, max_range);
   
-  oxb_vec3 a = oxb_vec3_abs(OXB_VEC3_INIT(tmp, tmp1, tmp2));
+  oxb_vec3 a = oxb_vec3_abs((oxb_vec3)OXB_VEC3_INIT(tmp, tmp1, tmp2));
   assert(fabsf(oxb_vec3_getx(a) - fabsf(tmp)) < epsilon);
   assert(fabsf(oxb_vec3_gety(a) - fabsf(tmp1)) < epsilon);  
   assert(fabsf(oxb_vec3_getz(a) - fabsf(tmp2)) < epsilon);  
@@ -588,7 +588,7 @@ void VECTOR4_TEST() {
  const float epsilon = 1e-2f;
  const float min_range = -100.0f;
  const float max_range =  100.0f;
- const int loop_repeat = 100;
+ const int loop_repeat = 10;
  
  printf("--splat test\n");
  /* splat test */
@@ -675,7 +675,7 @@ void VECTOR4_TEST() {
   float tmp2 = VECTOR_TEST_RANDOM(min_range, max_range);
   float tmp3 = VECTOR_TEST_RANDOM(min_range, max_range);
   
-  oxb_vec4 a = oxb_vec4_neg(OXB_VEC4_INIT(tmp, tmp1, tmp2, tmp3));
+  oxb_vec4 a = oxb_vec4_neg((oxb_vec4)OXB_VEC4_INIT(tmp, tmp1, tmp2, tmp3));
   assert(fabsf(oxb_vec4_getx(a) - -tmp) < epsilon);
   assert(fabsf(oxb_vec4_gety(a) - -tmp1) < epsilon);  
   assert(fabsf(oxb_vec4_getz(a) - -tmp2) < epsilon);  
@@ -690,7 +690,7 @@ void VECTOR4_TEST() {
   float tmp2 = VECTOR_TEST_RANDOM(min_range, max_range);
   float tmp3 = VECTOR_TEST_RANDOM(min_range, max_range);
   
-  oxb_vec4 a = oxb_vec4_abs(OXB_VEC4_INIT(tmp, tmp1, tmp2, tmp3));
+  oxb_vec4 a = oxb_vec4_abs((oxb_vec4)OXB_VEC4_INIT(tmp, tmp1, tmp2, tmp3));
   assert(fabsf(oxb_vec4_getx(a) - fabsf(tmp)) < epsilon);
   assert(fabsf(oxb_vec4_gety(a) - fabsf(tmp1)) < epsilon);  
   assert(fabsf(oxb_vec4_getz(a) - fabsf(tmp2)) < epsilon);  

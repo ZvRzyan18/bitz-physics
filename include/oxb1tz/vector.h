@@ -14,9 +14,17 @@
 #define OXB_VEC3_INIT(a, b, c) ((float32x4_t){a, b, c, 0.0f})
 #define OXB_VEC4_INIT(a, b, c, d) ((float32x4_t){a, b, c, d})
 #else
+
+#if defined(_MSC_VER)
+#define OXB_VEC2_INIT(a, b) {{a, b}}
+#define OXB_VEC3_INIT(a, b, c) {{a, b, c}}
+#define OXB_VEC4_INIT(a, b, c, d) {{a, b, c, d}}
+#else
 #define OXB_VEC2_INIT(a, b) ((oxb_vec2){{a, b}})
 #define OXB_VEC3_INIT(a, b, c) ((oxb_vec3){{a, b, c}})
 #define OXB_VEC4_INIT(a, b, c, d) ((oxb_vec4){{a, b, c, d}})
+#endif
+
 #endif
 
 
@@ -516,7 +524,11 @@ static const uint32_t perm_tbl[4] = {
  return vreinterpretq_f32_u8(result);
 #endif
 #else
- return OXB_VEC3_INIT(oxb_vec3_get(x, a), oxb_vec3_get(x, b), oxb_vec3_get(x, c));
+ oxb_vec3 out;
+ out._arr[0] = oxb_vec3_get(x, a);
+ out._arr[1] = oxb_vec3_get(x, b);
+ out._arr[2] = oxb_vec3_get(x, c);
+ return out;
 #endif
 }
 
@@ -914,7 +926,12 @@ static const uint32_t perm_tbl[4] = {
  return vreinterpretq_f32_u8(result);
 #endif
 #else
- return OXB_VEC4_INIT(oxb_vec4_get(x, a), oxb_vec4_get(x, b), oxb_vec4_get(x, c), oxb_vec4_get(x, d));
+ oxb_vec4 out;
+ out._arr[0] = oxb_vec4_get(x, a);
+ out._arr[1] = oxb_vec4_get(x, b);
+ out._arr[2] = oxb_vec4_get(x, c);
+ out._arr[3] = oxb_vec4_get(x, d);
+ return out;
 #endif
 }
 
