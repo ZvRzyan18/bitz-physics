@@ -50,13 +50,14 @@ void oxb_dynamic2d_init(oxb_dynamic2d *oxb_restrict const body, const oxb_object
  body->_damping._arr[0] = oxb_log2(info->_type._dynamic_body._linear_damping);
  body->_damping._arr[1] = oxb_log2(info->_type._dynamic_body._angular_damping);
 */
- oxb_vec2_store(body->_damping._arr, oxb_vec2_log2(OXB_VEC2_INIT(info->_type._dynamic_body._linear_damping, info->_type._dynamic_body._angular_damping)));
+ oxb_vec2 damping = OXB_VEC2_INIT(info->_type._dynamic_body._linear_damping, info->_type._dynamic_body._angular_damping);
+ oxb_vec2_store(body->_damping._arr, oxb_vec2_log2(damping));
  
  body->_friction._arr[0] = info->_type._dynamic_body._static_friction;
  body->_friction._arr[1] = info->_type._dynamic_body._dynamic_friction; 
  body->_restitution = info->_type._dynamic_body._restitution;
 
- body->_flags = info->_flags & (OXB_SHAPE_MASK_2D | OXB_FLAG_MASK_2D);
+ body->_flags = (uint16_t)info->_flags & (OXB_SHAPE_MASK_2D | OXB_FLAG_MASK_2D);
 
  body->_island_id = OXB_POOL_NULL_ID;
  /* calculate mass, inertia and copy shape data */
