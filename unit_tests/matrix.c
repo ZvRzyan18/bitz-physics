@@ -71,6 +71,7 @@ static void mat2x2_test() {
  const int loop_repeat = 10;
 
  printf("--transpose test\n");
+ fflush(stdout);
  /* transpose test */
  for(int kk = 0; kk < loop_repeat; kk++) {
   float tmp[4];
@@ -98,6 +99,7 @@ static void mat2x2_test() {
  }
  
  printf("--mul test\n");
+ fflush(stdout);
  /* mul test */
  for(int kk = 0; kk < loop_repeat; kk++) {
   float tmp[4], tmp1[4];
@@ -135,6 +137,7 @@ static void mat2x2_test() {
 
 
  printf("--inv test\n");
+ fflush(stdout);
  /* inverse test */
  for(int kk = 0; kk < loop_repeat; kk++) {
   float tmp[4];
@@ -162,6 +165,7 @@ static void mat2x2_test() {
 
 
  printf("--mul vec test\n");
+ fflush(stdout);
  /* mul vec test */
  for(int kk = 0; kk < loop_repeat; kk++) {
   float tmp[4], tmp1[4];
@@ -197,6 +201,7 @@ static void mat3x3_test() {
  const int loop_repeat = 10;
  
  printf("--transpose test\n");
+ fflush(stdout);
  /* transpose test */
  for(int kk = 0; kk < loop_repeat; kk++) {
   float tmp[9];
@@ -224,6 +229,7 @@ static void mat3x3_test() {
  }
  
  printf("--mul test\n");
+ fflush(stdout);
  /* mul test */
  for(int kk = 0; kk < loop_repeat; kk++) {
   float tmp[9], tmp1[9];
@@ -258,6 +264,7 @@ static void mat3x3_test() {
  }
  
  printf("--inv test\n");
+ fflush(stdout);
  /* inv test */
  for(int kk = 0; kk < loop_repeat; kk++) {
   float tmp[9];
@@ -283,6 +290,7 @@ static void mat3x3_test() {
  }
  
  printf("--vector matrix mul test\n");
+ fflush(stdout);
  /* inv test */
  for(int kk = 0; kk < loop_repeat; kk++) {
   float tmp[9];
@@ -313,9 +321,13 @@ static void mat3x3_test() {
 
 void oxb_matrix_test() {
  printf("[mat2x2] test...\n");
+ fflush(stdout);
  mat2x2_test();
  printf("\n");
+ 
+ 
  printf("[mat3x3] test...\n");
+ fflush(stdout);
  mat3x3_test();
  printf("\n");
 }

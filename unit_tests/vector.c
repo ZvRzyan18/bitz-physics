@@ -18,6 +18,7 @@ oxb_inline void VECTOR2_TEST() {
  const int loop_repeat = 10;
  
  printf("--splat test\n");
+ fflush(stdout);
  /* splat test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -27,6 +28,7 @@ oxb_inline void VECTOR2_TEST() {
  }
  
  printf("--setx sety, getx, gety test\n");
+ fflush(stdout);
  /* setx sety, getx, gety test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp_a = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -40,6 +42,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--set and get test\n");
+ fflush(stdout);
  /* set and get test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp_a = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -52,6 +55,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--load store test\n");
+ fflush(stdout);
  /* load store test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2], tmp1[2];
@@ -72,6 +76,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--laneswap test\n");
+ fflush(stdout);
  /* laneswap test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp_a = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -86,6 +91,7 @@ oxb_inline void VECTOR2_TEST() {
  }
  
  printf("--neg test\n");
+ fflush(stdout);
  /* neg test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -96,6 +102,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--abs test\n");
+ fflush(stdout);
  /* abs test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -106,6 +113,7 @@ oxb_inline void VECTOR2_TEST() {
  }
  
  printf("--add test\n");
+ fflush(stdout);
  /* add test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2], tmp1[2];
@@ -125,6 +133,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--sub test\n");
+ fflush(stdout);
  /* sub test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2], tmp1[2];
@@ -144,6 +153,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--mul test\n");
+ fflush(stdout);
  /* mul test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2], tmp1[2];
@@ -163,6 +173,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--div test\n");
+ fflush(stdout);
  /* div test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2], tmp1[2];
@@ -186,6 +197,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--fma test\n");
+ fflush(stdout);
  /* fma test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2], tmp1[2];
@@ -205,6 +217,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--dot test\n");
+ fflush(stdout);
  /* dot test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2], tmp1[2];
@@ -222,6 +235,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--normalize test\n");
+ fflush(stdout);
  /* nornalize test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2];
@@ -234,6 +248,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--rperp test\n");
+ fflush(stdout);
  /* perp test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2];
@@ -249,6 +264,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--lperp test\n");
+ fflush(stdout);
  /* perp test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2];
@@ -264,6 +280,7 @@ oxb_inline void VECTOR2_TEST() {
  }
  
  printf("--cross test\n");
+ fflush(stdout);
  /* cross test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2], tmp1[2];
@@ -280,6 +297,7 @@ oxb_inline void VECTOR2_TEST() {
  }
 
  printf("--scross test\n");
+ fflush(stdout);
  /* scross test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[2], tmp1;
@@ -304,6 +322,7 @@ oxb_inline void VECTOR3_TEST() {
  const int loop_repeat = 10;
  
  printf("--splat test\n");
+ fflush(stdout);
  /* splat test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -314,6 +333,7 @@ oxb_inline void VECTOR3_TEST() {
  }
 
  printf("--setx sety, getx, gety test\n");
+ fflush(stdout);
  /* setx sety, getx, gety test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp_a = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -330,6 +350,7 @@ oxb_inline void VECTOR3_TEST() {
  }
 
  printf("--set and get test\n");
+ fflush(stdout);
  /* set and get test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp_a = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -346,6 +367,7 @@ oxb_inline void VECTOR3_TEST() {
  }
 
  printf("--load store test\n");
+ fflush(stdout);
  /* load store test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[3], tmp1[3];
@@ -370,6 +392,7 @@ oxb_inline void VECTOR3_TEST() {
  }
 
  printf("--neg test\n");
+ fflush(stdout);
  /* neg test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -383,6 +406,7 @@ oxb_inline void VECTOR3_TEST() {
  }
 
  printf("--abs test\n");
+ fflush(stdout);
  /* abs test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -396,6 +420,7 @@ oxb_inline void VECTOR3_TEST() {
  }
  
  printf("--add test\n");
+ fflush(stdout);
  /* add test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[3], tmp1[3];
@@ -420,6 +445,7 @@ oxb_inline void VECTOR3_TEST() {
  }
 
  printf("--sub test\n");
+ fflush(stdout);
  /* sub test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[3], tmp1[3];
@@ -444,6 +470,7 @@ oxb_inline void VECTOR3_TEST() {
  }
 
  printf("--mul test\n");
+ fflush(stdout);
  /* mul test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[3], tmp1[3];
@@ -468,6 +495,7 @@ oxb_inline void VECTOR3_TEST() {
  }
 
  printf("--fma test\n");
+ fflush(stdout);
  /* fma test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[3], tmp1[3], tmp2[3];
@@ -497,6 +525,7 @@ oxb_inline void VECTOR3_TEST() {
  }
 
  printf("--div test\n");
+ fflush(stdout);
  /* div test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[3], tmp1[3];
@@ -526,6 +555,7 @@ oxb_inline void VECTOR3_TEST() {
  }
 
  printf("--dot test\n");
+ fflush(stdout);
  /* dot test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[3], tmp1[3];
@@ -546,6 +576,7 @@ oxb_inline void VECTOR3_TEST() {
  }
  
  printf("--normalize test\n");
+ fflush(stdout);
  /* nornalize test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[3];
@@ -559,6 +590,7 @@ oxb_inline void VECTOR3_TEST() {
  }
 
  printf("--cross test\n");
+ fflush(stdout);
  /* cross test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[3], tmp1[3];
@@ -591,6 +623,7 @@ void VECTOR4_TEST() {
  const int loop_repeat = 10;
  
  printf("--splat test\n");
+ fflush(stdout);
  /* splat test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -602,6 +635,7 @@ void VECTOR4_TEST() {
  }
 
  printf("--setx sety, getx, gety test\n");
+ fflush(stdout);
  /* setx sety, getx, gety test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp_a = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -621,6 +655,7 @@ void VECTOR4_TEST() {
  }
  
  printf("--set and get test\n");
+ fflush(stdout);
  /* set and get test */
  for(int i = 0; i < loop_repeat; i++) {
  float tmp_a = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -640,6 +675,7 @@ void VECTOR4_TEST() {
  }
 
  printf("--load store test\n");
+ fflush(stdout);
  /* load store test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[4], tmp1[4];
@@ -668,6 +704,7 @@ void VECTOR4_TEST() {
  }
 
  printf("--neg test\n");
+ fflush(stdout);
  /* neg test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -683,6 +720,7 @@ void VECTOR4_TEST() {
  }
 
  printf("--abs test\n");
+ fflush(stdout);
  /* abs test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -698,6 +736,7 @@ void VECTOR4_TEST() {
  }
  
  printf("--add test\n");
+ fflush(stdout);
  /* add test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[4], tmp1[4];
@@ -726,6 +765,7 @@ void VECTOR4_TEST() {
  }
 
  printf("--sub test\n");
+ fflush(stdout);
  /* sub test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[4], tmp1[4];
@@ -754,6 +794,7 @@ void VECTOR4_TEST() {
  }
  
  printf("--mul test\n");
+ fflush(stdout);
  /* mul test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[4], tmp1[4];
@@ -782,6 +823,7 @@ void VECTOR4_TEST() {
  }
 
  printf("--div test\n");
+ fflush(stdout);
  /* div test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[4], tmp1[4];
@@ -815,6 +857,7 @@ void VECTOR4_TEST() {
  }
 
  printf("--fma test\n");
+ fflush(stdout);
  /* fma test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[4], tmp1[4], tmp2[4];
@@ -849,6 +892,7 @@ void VECTOR4_TEST() {
  }
 
  printf("--dot test\n");
+ fflush(stdout);
  /* dot test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[4], tmp1[4];
@@ -871,6 +915,7 @@ void VECTOR4_TEST() {
  }
  
  printf("--normalize test\n");
+ fflush(stdout);
  /* normalize test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp[4];
@@ -890,10 +935,15 @@ void VECTOR4_TEST() {
 
 void oxb_vector_test() {
  printf("[vector2] test..\n");
+ fflush(stdout);
  VECTOR2_TEST();
+ 
  printf("\n\n[vector3] test..\n");
+ fflush(stdout);
  VECTOR3_TEST();
+ 
  printf("\n\n[vector4] test..\n");
+ fflush(stdout);
  VECTOR4_TEST();
  printf("\n");
 }

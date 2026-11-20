@@ -16,6 +16,7 @@ void oxb_complex_test() {
  const int loop_repeat = 10;
  
  printf("--mul test\n");
+ fflush(stdout);
  /* mul test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = COMPLEX_TEST_RANDOM(min_range, max_range);
@@ -36,6 +37,7 @@ void oxb_complex_test() {
  }
  
  printf("--conj test\n");
+ fflush(stdout);
  /* conj test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = COMPLEX_TEST_RANDOM(min_range, max_range);
@@ -50,7 +52,6 @@ void oxb_complex_test() {
   assert(fabsf(oxb_complex_imag(r) - imag) < epsilon);  
  }
  
-
 }
 
 

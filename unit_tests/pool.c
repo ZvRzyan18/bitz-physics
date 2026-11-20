@@ -84,12 +84,14 @@ static void debug_malloc_report() {
  printf("total_frees       : %zu\n", total_frees);
  printf("current bytes     : %zu\n", current_bytes);
  printf("highest_bytes     : %zu\n", highest_bytes);
-
+ fflush(stdout);
  test_allocation* record = allocations;
  while(record) {
   printf("[LEAK] : ptr=%p size=%zu bytes\n", record->_ptr, record->_size);
+  fflush(stdout);
   record = record->_next;
  }
+ fflush(stdout);
 }
 
 
@@ -103,6 +105,7 @@ void oxb_pool_test() {
  oxb_pool test;
  oxb_pool_create(&test, &alloc, sizeof(int), 1);
  printf("--acquire test\n");
+ fflush(stdout);
  oxb_pool_id ids[100];
  for(int i = 0; i < 100; i++) {
   ids[i] = oxb_pool_acquire(&test);
@@ -112,6 +115,7 @@ void oxb_pool_test() {
 
 
  printf("--get test\n");
+ fflush(stdout);
  for(int i = 0; i < 100; i++) {
   int *v = (int*)oxb_pool_get(&test, ids[i]);
   assert(*v == i);
@@ -119,6 +123,7 @@ void oxb_pool_test() {
  
  
  printf("--release test\n");
+ fflush(stdout);
  //release first half
  for(int i = 0; i < 50; i++) {
   oxb_pool_release(&test, ids[i]);
