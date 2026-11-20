@@ -72,7 +72,7 @@ const oxb_complex oxb_complex_identity = OXB_VEC2_INIT(1.0f, 0.0f);
 oxb_complex oxb_complex_rotate(const float a) {
  float s, c;
  oxb_sincos(a, &s, &c);
- return OXB_VEC2_INIT(c, s);
+ return (oxb_complex)OXB_VEC2_INIT(c, s);
 }
 /*
  complex angle uses simplification (same tricks, to eliminate the logarithm)
