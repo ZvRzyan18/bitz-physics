@@ -595,7 +595,7 @@ bool oxb_manifold2d_circle_vs_circle(oxb_manifold2d *oxb_restrict const out, con
  if(distance > epsilon) {
   normal = oxb_vec2_mul(delta, oxb_vec2_splat(1.0f / distance));
  } else {
-  normal = OXB_VEC2_INIT(1.0f, 0.0f);
+  normal = (oxb_vec2)OXB_VEC2_INIT(1.0f, 0.0f);
  }
  oxb_vec2_store(out->_contacts[0]._normal._arr, normal);
 
