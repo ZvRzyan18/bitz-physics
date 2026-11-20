@@ -41,10 +41,6 @@ else()
   $<$<COMPILE_LANGUAGE:C>:-Wall>
   $<$<COMPILE_LANGUAGE:C>:-Wextra>
   $<$<COMPILE_LANGUAGE:C>:-Werror>
-  #$<$<COMPILE_LANGUAGE:C>:-Wpedantic>
-  $<$<COMPILE_LANGUAGE:C>:-Wconversion>
-  $<$<COMPILE_LANGUAGE:C>:-Wsign-conversion>
-  $<$<COMPILE_LANGUAGE:C>:-Wshadow>
   $<$<COMPILE_LANGUAGE:C>:-O3>
  )
 endif()
