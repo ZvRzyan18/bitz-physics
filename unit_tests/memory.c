@@ -12,6 +12,7 @@ void oxb_memory_test() {
  uint8_t *dst = (uint8_t*)malloc(1024);
  
  printf("--memory set test\n");
+ fflush(stdout);
  
  oxb_memory_set(bytes, 0, 1024);
  oxb_memory_set(bytes + 10, 3, 512);
@@ -27,6 +28,7 @@ void oxb_memory_test() {
  }
  
  printf("--memory copy test\n");
+ fflush(stdout);
  oxb_memory_copy(dst, bytes, 1024);
 
  for(size_t i = 0; i < 10; i++) {

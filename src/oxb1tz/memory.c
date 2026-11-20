@@ -42,15 +42,6 @@ static void __neon_copy_small(uint8_t *oxb_restrict dst_bytes, const uint8_t *ox
   vst1q_u8(dst_bytes, vld1q_u8(src_bytes));
   dst_bytes += 16; src_bytes += 16; n -= 16; 
  }
- /* 
-  4 bytes loop copy
-  lets assume the compiler uses arm64 32 bit register
-  and load/store 32 bit data using it
- */
- while(n >= 4) {
-  *((uint32_t*)dst_bytes) = *((uint32_t*)src_bytes);
-  dst_bytes += 4; src_bytes += 4; n -= 4; 
- }
  while(n--) *(dst_bytes++) = *(src_bytes++);
 }
 
@@ -195,15 +186,6 @@ static void __neon_copy_large(uint8_t *oxb_restrict dst_bytes, const uint8_t *ox
  while(n >= 16) {
   vst1q_u8(dst_bytes, vld1q_u8(src_bytes));
   dst_bytes += 16; src_bytes += 16; n -= 16; 
- }
- /* 
-   4 bytes loop copy
-   lets assume the compiler uses arm64 32 bit register
-   and load/store 32 bit data using it
- */
- while(n >= 4) {
-  *((uint32_t*)dst_bytes) = *((uint32_t*)src_bytes);
-  dst_bytes += 4; src_bytes += 4; n -= 4; 
  }
  /* 1 byte loop copy */
  while(n--) *(dst_bytes++) = *(src_bytes++);

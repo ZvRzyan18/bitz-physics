@@ -34,6 +34,7 @@ static size_t total_allocations = 0;
 static size_t total_frees = 0;
 static size_t current_bytes = 0;
 static size_t highest_bytes = 0;
+static size_t current_allocation = 0;
 
 static void* debug_malloc(size_t size) {
  void* ptr = malloc(size);
@@ -61,6 +62,7 @@ static void* debug_malloc(size_t size) {
  if(current_bytes > highest_bytes) {
   highest_bytes = current_bytes;
  }
+ current_allocation++;
  return ptr;
 }
 
@@ -71,9 +73,11 @@ static void debug_free(void* ptr) {
  }
 
  test_allocation** link = &allocations;
-
+ size_t i = 0;
  while(*link && (*link)->_ptr != ptr) {
+  assert(i < current_allocation);
   link = &(*link)->_next;
+  i++;
  }
 
  if(!*link) {
@@ -89,6 +93,8 @@ static void debug_free(void* ptr) {
 
  free(record->_ptr);
  free(record);
+ 
+ current_allocation--;
 }
 
 static void debug_malloc_report() {
@@ -97,12 +103,17 @@ static void debug_malloc_report() {
  printf("total_frees       : %zu\n", total_frees);
  printf("current bytes     : %zu\n", current_bytes);
  printf("highest_bytes     : %zu\n", highest_bytes);
-
+ fflush(stdout);
  test_allocation* record = allocations;
+ size_t i = 0;
  while(record) {
+  assert(i < current_allocation);
   printf("[LEAK] : ptr=%p size=%zu bytes\n", record->_ptr, record->_size);
+  fflush(stdout);
   record = record->_next;
+  i++;
  }
+ fflush(stdout);
 }
 
 
@@ -131,6 +142,8 @@ void oxb_container_test() {
  oxb_container test;
  oxb_container_create(&test, &alloc, sizeof(int), 50);
  printf("--acquire test\n");
+ fflush(stdout);
+ 
  oxb_container_id ids[100];
  for(int i = 0; i < 100; i++) {
   ids[i] = oxb_container_acquire(&test);
@@ -141,6 +154,8 @@ void oxb_container_test() {
 
 
  printf("--get test\n");
+ fflush(stdout);
+ 
  for(int i = 0; i < 100; i++) {
   int *v = (int*)oxb_container_get(&test, ids[i]);
   assert(*v == i);
@@ -148,6 +163,8 @@ void oxb_container_test() {
  
  
  printf("--release test\n");
+ fflush(stdout);
+ 
  //release first half
  for(int i = 0; i < 50; i++) {
   oxb_container_release(&test, ids[i]);

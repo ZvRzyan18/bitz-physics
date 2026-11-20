@@ -46,7 +46,7 @@ void oxb_bump_destroy(oxb_bump *oxb_restrict const bump) {
 
 
 
-size_t oxb_bump_acquire(oxb_bump *oxb_restrict const bump, const size_t size, const uint8_t alignment) {
+size_t oxb_bump_acquire(oxb_bump *oxb_restrict const bump, const size_t size, const size_t alignment) {
  assert(alignment != 0);
  
  size_t requested = size + alignment;

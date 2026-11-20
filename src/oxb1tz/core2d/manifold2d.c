@@ -19,7 +19,7 @@ void oxb_manifold2d_combine(oxb_manifold2d *oxb_restrict const out, const oxb_ma
   for(size_t k = 0; k < out->_contact_count; k++) {
    contact_out = out->_contacts + k;
    if(contact_a->_id._value == contact_out->_id._value) {
-    j = k;
+    j = (int32_t)k;
     break;
    }
   }
@@ -102,7 +102,7 @@ edges
 */
 
 
-static void obb_get_inc_edge(const oxb_vec2 half_size, const oxb_mat3x3 transform, const uint8_t index, oxb_vec2 edge[2]) {
+static void obb_get_inc_edge(const oxb_vec2 half_size, const oxb_mat3x3 transform, const size_t index, oxb_vec2 edge[2]) {
  oxb_vec2 scale_x = oxb_vec2_splat(oxb_vec2_getx(half_size));
  oxb_vec2 scale_y = oxb_vec2_splat(oxb_vec2_gety(half_size));
  
@@ -239,7 +239,7 @@ bool oxb_manifold2d_box_vs_box(oxb_manifold2d *oxb_restrict const out, const oxb
  oxb_vec2 diff_pos = oxb_vec2_sub(position_b, position_a);
  
  float ra, rb, dist, depth_a, depth_b;
- uint8_t index_a, index_b;
+ size_t index_a, index_b;
  oxb_vec2 axis;
 
  depth_a = oxb_inf();
@@ -282,10 +282,10 @@ bool oxb_manifold2d_box_vs_box(oxb_manifold2d *oxb_restrict const out, const oxb
  }
  
  /* manifold generation */
- uint8_t ref_index, inc_index;
+ size_t ref_index, inc_index;
  oxb_mat3x3 ref_transform, inc_transform;
  oxb_vec2 ref_half_size, inc_half_size;
- uint8_t swapped;
+ bool swapped;
  const oxb_collider2d *ref_collider;
  const oxb_collider2d *inc_collider;
 
@@ -327,9 +327,9 @@ bool oxb_manifold2d_box_vs_box(oxb_manifold2d *oxb_restrict const out, const oxb
 
 
  ids[0]._bits._in_edge1 = BOX_PERP_SIDE[tmp_ref_index][0];
- ids[0]._bits._out_edge1 = tmp_ref_index;
+ ids[0]._bits._out_edge1 = (uint8_t)tmp_ref_index;
 
- ids[1]._bits._in_edge1 = tmp_ref_index;
+ ids[1]._bits._in_edge1 = (uint8_t)tmp_ref_index;
  ids[1]._bits._out_edge1 = BOX_PERP_SIDE[tmp_ref_index][1];
 
 
@@ -343,13 +343,13 @@ bool oxb_manifold2d_box_vs_box(oxb_manifold2d *oxb_restrict const out, const oxb
   inc_index = 1;
   flip = d1 > 0.0f;
  }
- uint8_t inc_edge_index = inc_index + (flip ? 2 : 0);
+ size_t inc_edge_index = inc_index + (flip ? 2 : 0);
 
  
  ids[0]._bits._in_edge2 = BOX_PERP_SIDE[inc_edge_index][0];
- ids[0]._bits._out_edge2 = inc_edge_index;
+ ids[0]._bits._out_edge2 = (uint8_t)inc_edge_index;
 
- ids[1]._bits._in_edge2 = inc_edge_index;
+ ids[1]._bits._in_edge2 = (uint8_t)inc_edge_index;
  ids[1]._bits._out_edge2 = BOX_PERP_SIDE[inc_edge_index][1];
 
  oxb_vec2 edge[2];

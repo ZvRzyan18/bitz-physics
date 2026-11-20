@@ -19,6 +19,7 @@ void oxb_math_test() {
  const int loop_repeat = 10;
 
  printf("--sin test\n");
+ fflush(stdout);
  /* sin test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -28,6 +29,7 @@ void oxb_math_test() {
  }
 
  printf("--cos test\n");
+ fflush(stdout);
  /* cos test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -37,6 +39,7 @@ void oxb_math_test() {
  }
 
  printf("--sincos test\n");
+ fflush(stdout);
  /* sincos test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -50,6 +53,7 @@ void oxb_math_test() {
  }
 
  printf("--asin test\n");
+ fflush(stdout);
  /* asin test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(-1.0f, 1.0f);
@@ -59,6 +63,7 @@ void oxb_math_test() {
  }
 
  printf("--acos test\n");
+ fflush(stdout);
  /* acos test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(-1.0f, 1.0f);
@@ -68,6 +73,7 @@ void oxb_math_test() {
  }
 
  printf("--atan test\n");
+ fflush(stdout);
  /* atan test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -77,6 +83,7 @@ void oxb_math_test() {
  }
 
  printf("--atan2 test\n");
+ fflush(stdout);
  /* atan2 test */
  for(int i = 0; i < 360; i++) {
   float tmp = (float)i * (OXB_PI / 180.0f);
@@ -87,6 +94,7 @@ void oxb_math_test() {
 
 
  printf("--log2 test\n");
+ fflush(stdout);
  /* log2 test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(0.0f, 5.0f);
@@ -97,6 +105,7 @@ void oxb_math_test() {
 
 
  printf("--exp2 test\n");
+ fflush(stdout);
  /* exp2 test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(-5.0f, 5.0f);
@@ -106,6 +115,7 @@ void oxb_math_test() {
  }
 
  printf("--tanh test\n");
+ fflush(stdout);
  /* tanh test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(min_range, max_range);
@@ -116,6 +126,7 @@ void oxb_math_test() {
 
 
  printf("--log test\n");
+ fflush(stdout);
  /* log test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(0.0f, 5.0f);
@@ -126,6 +137,7 @@ void oxb_math_test() {
 
 
  printf("--exp test\n");
+ fflush(stdout);
  /* exp test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(-5.0f, 5.0f);
@@ -136,6 +148,7 @@ void oxb_math_test() {
 
  /* non deterministic implementation (may vary depends on cpu) */
  printf("--rsqrt test\n");
+ fflush(stdout);
  /* rsqrt test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(0.0f, max_range);
@@ -145,6 +158,7 @@ void oxb_math_test() {
  }
 
  printf("--sqrt test\n");
+ fflush(stdout);
  /* sqrt test */
  for(int i = 0; i < loop_repeat; i++) {
   float tmp = VECTOR_TEST_RANDOM(0.0f, max_range);

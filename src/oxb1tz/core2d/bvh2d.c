@@ -978,7 +978,7 @@ void oxb_bvh2d_mediansplit(oxb_bvh2d *oxb_restrict const bvh, oxb_pool2d *oxb_re
  if(total_size == 0)
   return;
  
- size_t offset = oxb_bump_acquire(&bvh->_bump, sizeof(oxb_pool_id) * total_size, (uint8_t)bvh->_pool._allocator->_alignment);
+ size_t offset = oxb_bump_acquire(&bvh->_bump, sizeof(oxb_pool_id) * total_size, bvh->_pool._allocator->_alignment);
  oxb_pool_id *leafs = oxb_bump_get(&bvh->_bump, offset);
  
  size_t current_offset = 0;

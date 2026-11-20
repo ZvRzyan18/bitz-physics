@@ -134,7 +134,7 @@ oxb_inline float oxb_floor(const float x) {
 }
 
 oxb_const uint32_t oxb_hash(uint32_t a);
-oxb_const uintptr_t oxb_alignto(const uintptr_t x, const uint8_t alignment);
+oxb_const uintptr_t oxb_alignto(const uintptr_t x, const size_t alignment);
 oxb_const uint32_t oxb_nextp2(const uint32_t x);
 
 

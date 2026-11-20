@@ -177,10 +177,10 @@ oxb_container_id oxb_container_acquire(oxb_container *oxb_restrict const c) {
  } else {
   if(c->_forward_index >= c->_max_size)
    resize(c);
-  id._val = c->_forward_index++;
+  id._val = (oxb_id)c->_forward_index++;
  }
  const size_t index = c->_size++;
- c->_id_to_index[id._val]._val = index;
+ c->_id_to_index[id._val]._val = (oxb_id)index;
  c->_index_to_id[index] = id;
  return id;
 }
@@ -209,7 +209,7 @@ void oxb_container_release(oxb_container *oxb_restrict const c, const oxb_contai
 
  if(current_index != last_index) {
   oxb_memory_copy(c->_bytes + ((size_t)current_index * (size_t)c->_stride), c->_bytes + ((size_t)last_index * (size_t)c->_stride), c->_stride);
-  c->_id_to_index[last_id._val]._val = current_index;
+  c->_id_to_index[last_id._val]._val = (oxb_id)current_index;
   c->_index_to_id[current_index] = last_id;
  }
 #ifndef NDEBUG
@@ -235,7 +235,7 @@ void oxb_container_reset(oxb_container *oxb_restrict const c) {
 
 
 void oxb_container_insertionsort(oxb_container *oxb_restrict const c, bool (*should_swap)(void *a, void * b)) {
- for(size_t i = 1; i < c->_size; i++) {
+ for(int i = 1; i < (int)c->_size; i++) {
   int j = i;
   int jm1 = j - 1;
   void *j_data = c->_bytes + (j * c->_stride);

@@ -56,7 +56,7 @@ oxb_hot oxb_noinline static void insert_unique(oxb_contacthash2d *oxb_restrict c
 
 
 void oxb_contacthash2d_create(oxb_contacthash2d *oxb_restrict const c, oxb_allocator *oxb_restrict const alloc, const size_t reserve) {
- c->_buckets_size = oxb_nextp2(reserve);
+ c->_buckets_size = oxb_nextp2((uint32_t)reserve);
  c->_buckets_mask = c->_buckets_size - 1;
  oxb_container_create(&c->_pool, alloc, sizeof(oxb_contacthash2d_node), c->_buckets_size);
 
