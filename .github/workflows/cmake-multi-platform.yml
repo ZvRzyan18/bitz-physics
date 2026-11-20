@@ -34,6 +34,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup MSVC
+        if: matrix.compiler == 'cl'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+         arch: x64
 
   # 1. Configure your existing CMake project
       - name: Configure CMake
@@ -65,8 +70,8 @@ jobs:
           mkdir -p build/unit_tests
           if [[ "${{ matrix.compiler }}" == "cl" ]]; then
           
-           STATIC_LIB="build/oxb1tz.lib"
-           cl \
+           STATIC_LIB="build/Release/oxb1tz.lib"
+           "${{ matrix.compiler }}" \
            /nologo \
            /I include \
            /DOXB_TEST \
