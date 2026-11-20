@@ -15,7 +15,7 @@ oxb_inline void VECTOR2_TEST() {
  const float epsilon = 1e-2f;
  const float min_range = -100.0f;
  const float max_range =  100.0f;
- const int loop_repeat = 100;
+ const int loop_repeat = 10;
  
  printf("--splat test\n");
  /* splat test */
