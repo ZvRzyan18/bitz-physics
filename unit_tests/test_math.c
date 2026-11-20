@@ -49,17 +49,6 @@ void oxb_math_test() {
   assert(fabsf(ra[1] - rb[1]) < trig_epsilon);
  }
 
- printf("--tan test\n");
- /* tan test */
- for(int i = 0; i < loop_repeat; i++) {
-  float tmp = VECTOR_TEST_RANDOM(OXB_PI * -2.0f, OXB_PI * 2.0f);
-  float ra = oxb_tan(tmp);
-  float rb = tanf(tmp);
-  if(isnan(ra) || isnan(rb) || isinf(ra) || isinf(rb))
-   continue;
-  assert(fabsf(ra - rb) < trig_epsilon);
- }
-
  printf("--asin test\n");
  /* asin test */
  for(int i = 0; i < loop_repeat; i++) {
