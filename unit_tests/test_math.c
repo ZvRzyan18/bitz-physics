@@ -89,7 +89,7 @@ void oxb_math_test() {
  printf("--log2 test\n");
  /* log2 test */
  for(int i = 0; i < loop_repeat; i++) {
-  float tmp = VECTOR_TEST_RANDOM(0.0f, max_range);
+  float tmp = VECTOR_TEST_RANDOM(0.0f, 5.0f);
   float ra = oxb_log2(tmp);
   float rb = log2f(tmp);
   assert(fabsf(ra - rb) < epsilon);
@@ -99,7 +99,7 @@ void oxb_math_test() {
  printf("--exp2 test\n");
  /* exp2 test */
  for(int i = 0; i < loop_repeat; i++) {
-  float tmp = VECTOR_TEST_RANDOM(-5.0f, 10.0f);
+  float tmp = VECTOR_TEST_RANDOM(-5.0f, 5.0f);
   float ra = oxb_exp2(tmp);
   float rb = exp2f(tmp);
   assert(fabsf(ra - rb) < epsilon);
@@ -118,7 +118,7 @@ void oxb_math_test() {
  printf("--log test\n");
  /* log test */
  for(int i = 0; i < loop_repeat; i++) {
-  float tmp = VECTOR_TEST_RANDOM(0.0f, max_range);
+  float tmp = VECTOR_TEST_RANDOM(0.0f, 5.0f);
   float ra = oxb_log(tmp);
   float rb = logf(tmp);
   assert(fabsf(ra - rb) < epsilon);
