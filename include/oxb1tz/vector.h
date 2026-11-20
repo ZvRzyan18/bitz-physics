@@ -14,9 +14,17 @@
 #define OXB_VEC3_INIT(a, b, c) ((float32x4_t){a, b, c, 0.0f})
 #define OXB_VEC4_INIT(a, b, c, d) ((float32x4_t){a, b, c, d})
 #else
+
+#if defined(_MSC_VER)
+#define OXB_VEC2_INIT(a, b) {{a, b}}
+#define OXB_VEC3_INIT(a, b, c) {{a, b, c}}
+#define OXB_VEC4_INIT(a, b, c, d) {{a, b, c, d}}
+#else
 #define OXB_VEC2_INIT(a, b) ((oxb_vec2){{a, b}})
 #define OXB_VEC3_INIT(a, b, c) ((oxb_vec3){{a, b, c}})
 #define OXB_VEC4_INIT(a, b, c, d) ((oxb_vec4){{a, b, c, d}})
+#endif
+
 #endif
 
 
