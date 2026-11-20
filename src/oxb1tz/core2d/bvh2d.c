@@ -816,9 +816,9 @@ static oxb_pool_id build_top_down_recursive(oxb_bvh2d *const bvh, oxb_pool_id *l
   oxb_bvh2d_node *leaf = (oxb_bvh2d_node*)oxb_pool_get(&bvh->_pool, leafs[i]);
   float center_x = (leaf->_aabb._min._arr[0] + leaf->_aabb._max._arr[0]) * 0.5f;
   float center_y = (leaf->_aabb._min._arr[1] + leaf->_aabb._max._arr[1]) * 0.5f;
-  
-  centroid_min = oxb_vec2_min(centroid_min, OXB_VEC2_INIT(center_x, center_y));
-  centroid_max = oxb_vec2_max(centroid_max, OXB_VEC2_INIT(center_x, center_y));
+  oxb_vec2 center_pos = OXB_VEC2_INIT(center_x, center_y);
+  centroid_min = oxb_vec2_min(centroid_min, center_pos);
+  centroid_max = oxb_vec2_max(centroid_max, center_pos);
  }
 
  oxb_vec2_store(centroid_bounds._min._arr, centroid_min);
