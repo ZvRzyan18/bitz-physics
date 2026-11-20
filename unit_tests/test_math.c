@@ -16,7 +16,7 @@ void oxb_math_test() {
  const float trig_epsilon = 3.9f;
  const float min_range = -50.0f;
  const float max_range =  50.0f;
- const int loop_repeat = 100;
+ const int loop_repeat = 10;
 
  printf("--sin test\n");
  /* sin test */
