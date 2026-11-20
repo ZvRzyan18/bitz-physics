@@ -71,9 +71,9 @@ jobs:
           if [[ "${{ matrix.compiler }}" == "cl" ]]; then
           
            STATIC_LIB="build/Release/oxb1tz.lib"
-           "${{ matrix.compiler }}" \
+           MSYS_NO_PATHCONV=1 ${{ matrix.compiler }} \
            /nologo \
-           /I include \
+           /I"$GITHUB_WORKSPACE/include" \
            /DOXB_TEST \
            unit_tests/entry/main.c \
            "$STATIC_LIB" \
@@ -95,5 +95,10 @@ jobs:
     # 4. Run unit tests
       - name: Run Unit Tests
         shell: bash
-        run: ./build/unit_tests/unit_tests
+        run: | 
+         if [[ "${{ matrix.compiler }}" == "cl" ]]; then
+          ./build/unit_tests/unit_tests.exe
+         else
+          ./build/unit_tests/unit_tests
+         fi
 
