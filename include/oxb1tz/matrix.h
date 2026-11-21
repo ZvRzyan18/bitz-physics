@@ -7,8 +7,8 @@
 extern "C" {
 #endif
 
-extern const oxb_mat2x2 oxb_mat2x2_identity;
-extern const oxb_mat3x3 oxb_mat3x3_identity;
+extern const oxb_mat2x2 OXB_MAT2X2_IDENTITY;
+extern const oxb_mat3x3 OXB_MAT3X3_IDENTITY;
 
 oxb_hot void oxb_mat2x2_store(float *oxb_restrict const arr, const oxb_mat2x2 m);
 oxb_hot oxb_mat2x2 oxb_mat2x2_load(const float *oxb_restrict const arr);

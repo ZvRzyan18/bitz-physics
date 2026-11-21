@@ -3,7 +3,7 @@
 
 #include "oxb1tz/vector.h"
 
-extern const oxb_complex oxb_complex_identity;
+extern const oxb_complex OXB_COMPLEX_IDENTITY;
 
 oxb_inline float oxb_complex_real(const oxb_complex c) {
  return oxb_vec2_getx(c);
