@@ -30,6 +30,7 @@ jobs:
 
           - os: macos-latest
             compiler: clang
+        mode: [OXB_SIMD, OXB_SCALAR]
 
     steps:
       - name: Checkout
@@ -44,15 +45,16 @@ jobs:
       - name: Configure CMake
         shell: bash
         run: |
+         MODE_DEFINE = "-D${{ matrix.mode }}"
          if [[ "${{ matrix.compiler }}" == "cl" ]]; then
           MSYS_NO_PATHCONV=1 cmake -B build -S . \
           -DCMAKE_C_COMPILER=cl \
-          -DCMAKE_C_FLAGS="/DOXB_TEST" \
+          -DCMAKE_C_FLAGS="/DOXB_TEST /D$MODE_DEFINE" \
           -DCMAKE_BUILD_TYPE=Debug
          else
           cmake -B build -S . \
           -DCMAKE_C_COMPILER=${{ matrix.compiler }} \
-          -DCMAKE_C_FLAGS="-DOXB_TEST" \
+          -DCMAKE_C_FLAGS="-DOXB_TEST -D$MODE_DEFINE" \
           -DCMAKE_BUILD_TYPE=Debug
          fi
   # 2. Build the static library
@@ -67,6 +69,7 @@ jobs:
       - name: Compile Unit Tests
         shell: bash
         run: |
+          MODE_DEFINE = "-D${{ matrix.mode }}"
           mkdir -p build/unit_tests
           if [[ "${{ matrix.compiler }}" == "cl" ]]; then
           
@@ -75,7 +78,7 @@ jobs:
            /nologo \
            /MDd \
            /I"$GITHUB_WORKSPACE/include" \
-           /DOXB_TEST \
+           /DOXB_TEST /D$MODE_DEFINE \
            unit_tests/entry/main.c \
            "$STATIC_LIB" \
            /Febuild/unit_tests/unit_tests.exe
@@ -85,7 +88,7 @@ jobs:
            STATIC_LIB="build/liboxb1tz.a"
            ${{ matrix.compiler }} \
            -I include \
-           -DOXB_TEST \
+           -DOXB_TEST -DMODE_DEFINE \
            unit_tests/entry/main.c \
            "$STATIC_LIB" \
            -lm \
