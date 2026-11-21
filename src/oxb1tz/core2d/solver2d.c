@@ -548,8 +548,9 @@ static void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb
 	 va = oxb_vec2_add(obj[0]._velocity, oxb_vec2_scross(obj[0]._omega, r1));
   vb = oxb_vec2_add(obj[1]._velocity, oxb_vec2_scross(obj[1]._omega, r2));
 	 relative_vel = oxb_vec2_sub(vb, va);
-
+	 
 		float vt = oxb_vec2_dot(relative_vel, tangent);
+  
  	j = contact->_mass_tangent * -vt;
 
   float dynamic_limit = dynamic_friction * contact->_normal_lambda;
@@ -563,6 +564,7 @@ static void oxb_solver2d_contact_solve(oxb_manifold2d *oxb_restrict const m, oxb
    } else {
     contact->_tangent_lambda = target_tangent;
    }
+   
    j = contact->_tangent_lambda - prev_tangent;
   }
 
