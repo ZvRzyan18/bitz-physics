@@ -63,7 +63,7 @@ jobs:
       - name: Configure CMake
         shell: bash
         run: |
-         MODE_DEFINE = "${{ matrix.mode }}"
+         MODE_DEFINE="${{ matrix.mode }}"
          if [[ "${{ matrix.compiler }}" == "cl" ]]; then
           MSYS_NO_PATHCONV=1 cmake -B build -S . \
           -DCMAKE_C_COMPILER=cl \
@@ -87,7 +87,7 @@ jobs:
       - name: Compile Unit Tests
         shell: bash
         run: |
-          MODE_DEFINE = "${{ matrix.mode }}"
+          MODE_DEFINE="${{ matrix.mode }}"
           mkdir -p build/unit_tests
           if [[ "${{ matrix.compiler }}" == "cl" ]]; then
           
