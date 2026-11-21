@@ -4,12 +4,12 @@
 #include "oxb1tz/mask.h"
 
 
-const oxb_mat2x2 oxb_mat2x2_identity = {
+const oxb_mat2x2 OXB_MAT2X2_IDENTITY = {
  ._basis[0] = OXB_VEC2_INIT(1.0f, 0.0f),
  ._basis[1] = OXB_VEC2_INIT(0.0f, 1.0f),
 };
 
-const oxb_mat3x3 oxb_mat3x3_identity = {
+const oxb_mat3x3 OXB_MAT3X3_IDENTITY = {
  ._basis[0] = OXB_VEC3_INIT(1.0f, 0.0f, 0.0f),
  ._basis[1] = OXB_VEC3_INIT(0.0f, 1.0f, 0.0f),
  ._basis[2] = OXB_VEC3_INIT(0.0f, 0.0f, 1.0f),

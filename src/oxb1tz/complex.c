@@ -1,6 +1,6 @@
 #include "oxb1tz/complex.h"
 
-const oxb_complex oxb_complex_identity = OXB_VEC2_INIT(1.0f, 0.0f);
+const oxb_complex OXB_COMPLEX_IDENTITY = OXB_VEC2_INIT(1.0f, 0.0f);
 
 /*
  src : https://en.wikipedia.org/wiki/Euler%27s_formula
