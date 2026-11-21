@@ -113,7 +113,7 @@ void oxb_pool_test() {
  alloc._alignment = 16;
  
  oxb_pool test;
- oxb_pool_create(&test, &alloc, sizeof(int), 1);
+ oxb_pool_create(&test, &alloc, sizeof(int), 2);
  printf("--acquire test\n");
  fflush(stdout);
  oxb_pool_id ids[100];

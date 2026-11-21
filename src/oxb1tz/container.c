@@ -19,7 +19,7 @@ oxb_inline void memswap(void *oxb_restrict const a, void *oxb_restrict const b, 
 oxb_cold oxb_noinline static void resize(oxb_container *oxb_restrict const c) {
  oxb_container new_container;
  new_container._allocator = c->_allocator;
-	new_container._max_size = c->_max_size << 1;
+	new_container._max_size = c->_max_size * 2;
 	new_container._size = c->_size;
 	new_container._stride = c->_stride;
 

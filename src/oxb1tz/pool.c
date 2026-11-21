@@ -13,7 +13,7 @@ const oxb_pool_id OXB_POOL_NULL_ID = {._val = OXB_ID_MAX};
 */
 oxb_cold oxb_noinline static void resize(oxb_pool *oxb_restrict const pool) {
  oxb_pool new_pool;
- new_pool._max_size = pool->_max_size << 1;
+ new_pool._max_size = pool->_max_size * 2;
  new_pool._size = pool->_size;
  new_pool._stride = pool->_stride;
  new_pool._allocator = pool->_allocator;

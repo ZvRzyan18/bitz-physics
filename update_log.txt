@@ -1,5 +1,7 @@
 # version 0.1.2
 
+• use uppercase for constant values
+
 • make initializer more portable
 
 • use fflush to print display the print result ASAP
